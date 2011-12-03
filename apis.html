@@ -1,0 +1,360 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote {
+    margin: 0;
+    padding: 0;
+}
+body {
+    font-family: "Helvetica Neue", Helvetica, "Hiragino Sans GB", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 18px;
+    color: #737373;
+    margin: 10px 10px 10px 20px;
+}
+a {
+    color: #0069d6;
+}
+a:hover {
+    color: #0050a3;
+    text-decoration: none;
+}
+a img {
+    border: none;
+}
+p {
+    margin-bottom: 9px;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: #404040;
+    line-height: 36px;
+}
+h1 {
+    margin-bottom: 18px;
+    font-size: 30px;
+}
+h2 {
+    font-size: 24px;
+}
+h3 {
+    font-size: 18px;
+}
+h4 {
+    font-size: 16px;
+}
+h5 {
+    font-size: 14px;
+}
+h6 {
+    font-size: 13px;
+}
+hr {
+    margin: 0 0 19px;
+    border: 0;
+    border-bottom: 1px solid #aaa;
+}
+blockquote {
+    padding: 13px 13px 21px 15px;
+    margin-bottom: 18px;
+    font-family:georgia,serif;
+    font-style: italic;
+}
+blockquote:before {
+    content:"\201C";
+    font-size:40px;
+    margin-left:-10px;
+    font-family:georgia,serif;
+    color:#eee;
+}
+blockquote p {
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 18px;
+    margin-bottom: 0;
+    font-style: italic;
+}
+code, pre {
+    padding: 0 3px 2px;
+    font-family: Monaco, Andale Mono, Courier New, monospace;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+code {
+    background-color: #fee9cc;
+    color: rgba(0, 0, 0, 0.75);
+    padding: 1px 3px;
+    font-size: 12px;
+}
+pre {
+    display: block;
+    padding: 14px;
+    margin: 0 0 18px;
+    line-height: 16px;
+    font-size: 11px;
+    border: 1px dashed #ccc;
+    border: 1px dashed rgba(0, 0, 0, 0.15);
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    white-space: pre;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+pre code {
+    background-color: #fdfdfd;
+    color:#737373;
+    font-size: 11px;
+}
+@media screen and (min-width: 768px) {
+    body {
+        width: 748px;
+        margin:10px auto;
+    }
+}
+</style>
+<title>apis.html</title>
+</head>
+<body>
+<h1>List of API&rsquo;s</h1>
+
+<p>Authentication API &ndash; LDAP, SSO
+Authorisation API &ndash; Moodle? (existing custom USQ API)</p>
+
+<p>Distributed authentication?</p>
+
+<p>File Management:</p>
+
+<ul>
+<li>get file list</li>
+<li>add/edit/delete file</li>
+<li>retrieve file (relies upon authentication API/authorisation API)</li>
+</ul>
+
+
+<p>Distributed Authorisation/Authentication API &ndash; token validator:</p>
+
+<ul>
+<li>create token for service</li>
+<li>validate token</li>
+</ul>
+
+
+<p>Deduplication layer also handles file auditing
+Two levels of auditing:</p>
+
+<ul>
+<li>first level is for access to the real item</li>
+<li>second level is for access to the virtual item</li>
+</ul>
+
+
+<h1>Edge Node API Notes</h1>
+
+<p>Edge Node Download:
+http://edge.noncdn.org/auth/[user]/[token]/container/path/to/file</p>
+
+<p>Token Composition (MD5:38 char/SHA1: 46 char):</p>
+
+<ul>
+<li>edge identifier in base 36 (2 char for up to 1296 server [0 index; 0 pad])</li>
+<li>date + hour (ymdH) in base 36 (5 chars)</li>
+<li>MD5 or SHA1 encoded username, date + hour, edge shared secret (token validation) (32 chars/40 chars)</li>
+</ul>
+
+
+<p>Note:</p>
+
+<ul>
+<li>Get binary (raw output, second arg to md5/sha1) and base64_encode instead of hex to save space</li>
+<li>Base 36 to compress characters by 3 in date + hour for URL</li>
+<li>edge identifier is a unique number in base 36, one character for up to 35 distinct nodes</li>
+</ul>
+
+
+<h2>API</h2>
+
+<h4>/auth/user/token/container/path/to/file</h4>
+
+<ul>
+<li>user: username</li>
+<li>token: request validation token</li>
+<li>container: logical container for content</li>
+<li>path/to/file: path to the file within the logical container</li>
+</ul>
+
+
+<h4>/server/invalidate_content</h4>
+
+<ul>
+<li>container: Container to invalidate</li>
+<li>filepath: File path to invalidate (can utilise a regexp, or exact path: /path/to/file) [Optional]
+Note: if filepath is not specified the entire container is invalidated</li>
+</ul>
+
+
+<h4>/server/invalidate_user</h4>
+
+<ul>
+<li>username: Username to invalidate. Any cached information is purged.</li>
+</ul>
+
+
+<h4>/server/invalidate_authorisations</h4>
+
+<ul>
+<li>container: Container to invalidate, if not specified all authorisations are invalidated [Optional]</li>
+</ul>
+
+
+<h1>Master Node API Notes</h1>
+
+<h2>API</h2>
+
+<h4>/content/get_content_id</h4>
+
+<ul>
+<li>container</li>
+<li>path/to/file</li>
+</ul>
+
+
+<p>Response</p>
+
+<ul>
+<li>file unqiue ID (deduplified identifier)</li>
+</ul>
+
+
+<h4>/content/get_content</h4>
+
+<ul>
+<li>file unique ID</li>
+</ul>
+
+
+<p>Response</p>
+
+<ul>
+<li>raw file contents</li>
+</ul>
+
+
+<p>NOTE: Send content map for file? As headers?
+|&ndash;> what if a lot of replicas? top 5?</p>
+
+<h4>/content/get_content_map</h4>
+
+<ul>
+<li>file unique id</li>
+<li>max age &ndash; max age in days</li>
+<li>age field &ndash; age validation field; last modified date, last accessed date</li>
+</ul>
+
+
+<p>Response</p>
+
+<ul>
+<li>replicas: replica map</li>
+</ul>
+
+
+<h4>/user/get_user_authorisations</h4>
+
+<ul>
+<li>username</li>
+<li>container &ndash; search term to limit (if more than 20 ACLs; OPTIONAL)</li>
+<li>offset &ndash; Used for paging</li>
+<li>page_size &ndash; number of entries in a page</li>
+</ul>
+
+
+<p>Response:</p>
+
+<ul>
+<li>authorisations: array of authorisations</li>
+</ul>
+
+
+<h4>/manage/data/container/path/to/file</h4>
+
+<ul>
+<li>Auth: Header (Basic, Token, OAuth)</li>
+<li>Manage file contents honouring HTTP verbs (GET, PUT, DELETE)</li>
+</ul>
+
+
+<h4>/mannage/webdav/container/path/to/file</h4>
+
+<ul>
+<li>Auth: Header</li>
+<li>WebDAV interface to files</li>
+</ul>
+
+
+<h4>/manage/users/username(.json|.xml|.html)</h4>
+
+<ul>
+<li>Manage a given user (GET to retrieve, PUT to replace, POST to modify fields, DELETE to remove)</li>
+</ul>
+
+
+<h4>/content/task/container/path</h4>
+
+<ul>
+<li>/content/file/container/path/to/file</li>
+<li>/content/basic/container/path/to/file</li>
+<li>/content/oauth/container/path/to/file</li>
+</ul>
+
+
+<p>Break Down:</p>
+
+<ul>
+<li>Controller: content</li>
+<li>Task: file|basic|oauth &ndash; maps to authentication type</li>
+<li>container: container identifier</li>
+<li>path/to/file: path to the file</li>
+</ul>
+
+
+<p>May redirect the user to:</p>
+
+<ul>
+<li>edge node with an authentication token</li>
+<li>to an SSO server for authentication</li>
+</ul>
+
+
+<h4>/user/login &ndash; Login entry point</h4>
+
+<ul>
+<li>username</li>
+<li>password/token</li>
+<li>OPTIONAL: if suffix (.json|.xml|.html) then result is returned per format</li>
+</ul>
+
+
+<p>Response:</p>
+
+<ul>
+<li>session token</li>
+<li>cookie is set</li>
+</ul>
+
+</body>
+</html>
