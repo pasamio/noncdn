@@ -7,6 +7,10 @@ class RoleProvider_Default
 {
 	public function getRoles($username)
 	{
-		return 'USER';	
-	}	
+		if (in_array($username, Array('pasamio', 'admin')))
+		{
+			return Array('USER');
+		}
+		return Array();
+	}
 }

@@ -4,13 +4,12 @@ namespace NonCDN;
 defined('NONCDN') or die();
 
 // Load the Joomla! Platform
-define('JPATH_PLATFORM', __DIR__.'/libraries/joomla-platform');
+define('JPATH_PLATFORM', __DIR__.'/libraries/joomla-platform/libraries');
 define('JPATH_ROOT', __DIR__);
 define('DS', DIRECTORY_SEPARATOR);
 
 // Load and setup the Joomla! class loader
-require JPATH_PLATFORM.'/libraries/loader.php';
-\JLoader::setup();
+require JPATH_PLATFORM.'/import.php';
 
 // Load the PSR-0 Class Loader and setup NonCDN namespace
 require __DIR__.'/libraries/psrloader.php';
@@ -25,9 +24,9 @@ if(!count($route))
 }
 
 // Borrow some Joomla!
-jimport('platform');
+//jimport('platform');
 jimport('joomla.base.object');
-jimport('joomla.filter.filterinput');
+//jimport('joomla.filter.input');
 $inputfilter = new \JFilterInput();
 $controller = $inputfilter->clean(array_shift($route), 'CMD');
 

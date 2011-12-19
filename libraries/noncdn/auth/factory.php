@@ -15,4 +15,10 @@ class Auth_Factory extends Factory
 		$containerProviderClass = $this->configuration->getContainerAccessProvider();
 		return new $containerProviderClass($this->configuration);
 	}
+	
+	public function getCredentialStore()
+	{
+		$credentialStoreClass = $this->configuration->getCredentialStore();
+		return new $credentialStoreClass($this->configuration);
+	}
 }

@@ -13,4 +13,9 @@ class Auth_Configuration extends Configuration
 	{
 		return 'NonCDN\Container_Access_Default';
 	}
+	
+	public function getCredentialStore()
+	{
+		return 'NonCDN\CredentialStore_Default';
+	}
 }

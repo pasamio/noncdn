@@ -12,29 +12,22 @@ class Auth_Controller_User extends BaseController
 		$username = $params['username'];
 		$token = $params['token'];
 
-		if(!strlen($username))
+		if (!strlen($username))
 		{
 			RequestSupport::terminate(500, 'Missing username');
 		}		
 		
-		$result = false;
-		switch($username)
+		$error = false;
+		$credentialStore = $this->factory->getCredentialStore();
+		$result = $credentialStore->validateCredentials($username, $token);
+		
+		if (is_null($result))
 		{
-			case 'pasamio':
-				if($token == 'password')
-				{
-					$result = true;	
-				}
-				break;
-			case 'admin':
-				if($token == 'admin')
-				{
-					$result = true;	
-				}
-				break;
+			$result = false;
+			$error = true;
 		}
 
-		$this->outputResponse(array('error'=>false, 'result'=>$result));
+		$this->outputResponse(array('error'=>$error, 'result'=>$result));
 	}
 	
 	public function get_roles($args)
@@ -42,7 +35,7 @@ class Auth_Controller_User extends BaseController
 		$params = $this->getParams(Array('username'=>'CMD'));
 		$username = $params['username'];
 		
-		if(!strlen($username))
+		if (!strlen($username))
 		{
 			RequestSupport::terminate(500, 'Missing username');
 		}

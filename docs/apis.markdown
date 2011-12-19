@@ -86,7 +86,7 @@ Response
 
 
 #### /content/get_content
-- file unique ID
+- file_unique_id: file unique ID
 
 Response
 
@@ -193,7 +193,7 @@ Responses:
 
 The default return value for this should be an empty array.
 
-#### /container/check_access
+#### /container/check_role_access
 - container: Container to validate access against
 - roles: List of roles to check if are available
 
@@ -205,7 +205,8 @@ Response:
   - allow: permit access to the resource
 - status code/message for more details
 
-Any deny is a hard deny. Access checks stop at that point. Multiple access checks can be layered. The default 
+Any deny is a hard deny. Access checks stop at that point. Multiple access checks can be layered. The default is a deny.
+
 
 #### /container/get_roles
 - container: Container to validate access
@@ -217,3 +218,18 @@ Response:
   - deny roles: roles that deny access to this container
 
 Note: any deny is a hard deny. Access checks against a resource that has a deny role should deny access.
+
+
+#### /container/check_user_access
+- container: Container to validate access against
+- username: A username to check access against
+
+Response:
+
+- check for access: can be one of three states:
+  - unknown: does not permit or deny access
+  - deny: refuse access to the resource
+  - allow: permit access to the resource
+- status code/message for more details
+
+Any deny is a hard deny. Access checks stop at that point. Multiple access checks can be layered. The default is a deny.
