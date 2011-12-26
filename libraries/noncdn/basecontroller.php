@@ -16,7 +16,7 @@ class BaseController
 	 */
 	public function execute(array $args)
 	{	
-		$command = array_pop($args);
+		$command = array_shift($args);
 		
 		if(method_exists($this, $command))
 		{
