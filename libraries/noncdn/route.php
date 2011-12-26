@@ -54,7 +54,7 @@ class Route
 				RequestSupport::terminate(500, 'Invalid Request');
 			}
 		} while($start != $input);	
-		$filter = new \JInputFilter;
+		$filter = new \JFilterInput;
 		return $filter->clean($input, 'CMD');
 	}	
 }
