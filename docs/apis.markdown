@@ -219,6 +219,9 @@ Response:
 
 Note: any deny is a hard deny. Access checks against a resource that has a deny role should deny access.
 
+#### /container/check_access
+- container: Container to validate access against
+- roles: A set of rules to validate access
 
 #### /container/check_user_access
 - container: Container to validate access against
