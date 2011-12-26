@@ -26,4 +26,14 @@ class Factory
 			throw new Exception('Invalid Handler');
 		}
 	}
+	
+	public function buildAuthNodeClient()
+	{
+		return new Client_AuthNode($this->configuration);
+	}	
+	
+	public function buildAuthoriser()
+	{
+		return new Container_Authoriser($this->configuration);
+	}
 }
