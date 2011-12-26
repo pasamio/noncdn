@@ -15,6 +15,16 @@ class Auth_Controller_Container extends BaseController
 		));
 	}
 	
+	public function check_user_access($args)
+	{
+		$params = $this->getParams(array('container'=>'CMD', 'username'=>'CMD'));
+		$this->outputResponse(Array(
+			'error'=>false,
+			'result'=>false,
+			'params'=>$params
+		));
+	}
+	
 	public function get_roles($args)
 	{
 		$params = $this->getParams(Array('container'=>'CMD'));
