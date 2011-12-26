@@ -8,5 +8,6 @@ class NonCDNConfiguration
 	var $edge_secrets = Array('usq');
 	var $master_servers = Array('http://localhost/~pasamio/usq/master/');
 	var $max_token_age = 12; // hours
+	var $authenticator = '\NonCDN\Authenticator_Basic';
 }
 
