@@ -12,7 +12,7 @@ class Edge_Transport
 		
 		// clean each part of the path removing any '..' that might be there, filter out empty entries
 		// and then implode it back into a path; PHP need to work on consistency...
-		$path = implode('/', array_filter(array_map(Array('Route', 'cleanPath'), $path), 'strlen'));
+		$path = implode('/', array_filter(array_map(Array('NonCDN\Route', 'cleanPath'), $path), 'strlen'));
 		$localPath = JPATH_ROOT.'/data/'. $container.'/'.$path.'/'.$filename;
 		if(file_exists($localPath))
 		{
