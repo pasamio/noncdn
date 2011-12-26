@@ -27,4 +27,30 @@ class Configuration
 	{
 		return $this->configuration->max_token_age;
 	}
+	
+	/**
+	 * Return a list of available auth servers.
+	 *
+	 * @return  array  All available auth servers
+	 *
+	 * @since   1.0
+	 */
+	public function getAuthServers()
+	{
+		return $this->configuration->auth_servers;	
+	}
+	
+	/**
+	 * Return a "balanced" auth server
+	 *
+	 * @return  string  The URI to an auth server.
+	 * 
+	 * @since   1.0
+	 */
+	public function getAuthServer()
+	{
+		$authServers = $this->getAuthServers();	
+		$serverId = rand(0, count($authServers) - 1); // rand is inclusive, isn't it nice?
+		return $authServers[$serverId];
+	}
 }
