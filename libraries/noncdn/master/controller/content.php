@@ -20,4 +20,45 @@ class Master_Controller_Content extends BaseController
 		
 		
 	}
+	
+	public function file($args)
+	{
+		if (!count($args) || count($args) < 2)
+		{
+			RequestSupport::terminate(500, 'Missing container and path information');
+		}
+		
+		// start the session and authenticate the end user
+		session_start();
+		if (!isset($_SESSION['username']) || empty($_SESSION['username']))
+		{
+			$authenticator = $this->factory->buildAuthenticator();
+			$result = $authenticator->authenticate();
+			if ($result)
+			{
+				$_SESSION['username'] = $result;	
+			}
+			else
+			{
+				RequestSupport::terminate(500, 'Unidentified User');
+			}
+		}
+		
+		$username = $_SESSION['username'];
+		
+		$path = $args; // use a copy
+		
+		$filter = new \JFilterInput;
+		$container = $filter->clean(array_shift($path), 'CMD');
+		$path = $filter->clean(implode('/', $path), 'PATH');		
+		
+		$authoriser = $this->factory->buildAuthoriser();
+		if (!$authoriser->check_user_access($container, $username))
+		{
+			RequestSupport::terminate(403, 'Access Denied');
+		}
+		
+		echo ':D';
+		
+	}
 }
