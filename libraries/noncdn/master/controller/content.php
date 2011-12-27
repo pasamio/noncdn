@@ -2,7 +2,7 @@
 
 namespace NonCDN;
 
-class Master_Controller_Content extends BaseController
+class Master_Controller_Content extends Master_Controller_Base
 {
 	public function get_content_id($args)
 	{
@@ -43,22 +43,9 @@ class Master_Controller_Content extends BaseController
 				RequestSupport::terminate(500, 'Unidentified User');
 			}
 		}
-		
 		$username = $_SESSION['username'];
 		
-		$path = $args; // use a copy
-		
-		$filter = new \JFilterInput;
-		$container = $filter->clean(array_shift($path), 'CMD');
-		$path = $filter->clean(implode('/', $path), 'PATH');		
-		
-		$authoriser = $this->factory->buildAuthoriser();
-		if (!$authoriser->check_user_access($container, $username))
-		{
-			RequestSupport::terminate(403, 'Access Denied');
-		}
-		
-		echo ':D';
-		
+		// since we know who the user is we now can deliver them the file
+		$this->deliverFile($username, $args);
 	}
 }
