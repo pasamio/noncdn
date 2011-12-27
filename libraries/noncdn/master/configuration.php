@@ -10,6 +10,8 @@ class Master_Configuration extends Configuration
 		{
 			return $this->configuration->authenticator;
 		}
+		
+		// fallback authenticator class
 		return '\NonCDN\Authenticator_Basic';
 	}
 	
@@ -19,6 +21,17 @@ class Master_Configuration extends Configuration
 		{
 			return $this->configuration->auth_realm;
 		}
+		
+		// fallback realm
 		return 'NonCDN Authentication';
+	}
+	
+	public function getEdgeMap()
+	{
+		if (isset($this->configuration->edge_map))
+		{
+			return $this->configuration->edge_map;
+		}
+		return array();
 	}
 }
