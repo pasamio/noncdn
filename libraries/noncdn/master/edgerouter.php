@@ -89,15 +89,24 @@ class Master_EdgeRouter
 	}
 	
 	/**
-	 * Build a route for a user 
-	 
+	 * Build a route for a user to their requested item given a set of edges.
+	 *
+	 * @param   array   $edges      An array of valid edge nodes for the request.
+	 * @param   string  $username   The username of the requestor.
+	 * @param   string  $container  The container being requested.
+	 * @param   string  $path       The path being requested.
+	 *
+	 * @return  string  A URI to the target edge including auth token.
+	 *
+	 * @since   1.0
+	 */
 	protected function buildRoute($edges, $username, $container, $path)
 	{
 		$edgeServers = $this->configuration->getEdgeServers();
-		$edgeId = rand(0, count($edges) - 1);
+		$edgeId = $edges[rand(0, count($edges) - 1)];
 		
 		$token = $this->factory->buildTokenService()->generateToken($username, $edgeId);
 		
-		return $edges[$edgeId]."auth/$username/$token/$container/$path";
+		return $edgeServers[$edgeId]."auth/$username/$token/$container/$path";
 	}
 }
