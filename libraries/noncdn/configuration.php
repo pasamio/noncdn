@@ -41,7 +41,7 @@ class Configuration
 	}
 	
 	/**
-	 * Return a "balanced" auth server
+	 * Return a random auth server.
 	 *
 	 * @return  string  The URI to an auth server.
 	 * 
@@ -52,5 +52,17 @@ class Configuration
 		$authServers = $this->getAuthServers();	
 		$serverId = rand(0, count($authServers) - 1); // rand is inclusive, isn't it nice?
 		return $authServers[$serverId];
+	}
+	
+	/**
+	 * Get a list of edge servers.
+	 *
+	 * @return  array  List of edge servers.
+	 *
+	 * @since   1.0
+	 */
+	public function getEdgeServers()
+	{
+		return $this->configuration->edge_servers;
 	}
 }
