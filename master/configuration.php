@@ -9,10 +9,11 @@ class NonCDNConfiguration
 	public $master_servers = array('http://localhost/~pasamio/usq/master/');
 	public $max_token_age = 12; // hours
 	public $authenticator = '\NonCDN\Authenticator_Basic';
+	public $data_store = '/Users/smoffatt/Sites/usq/noncdn/datastore/';
 	
 	public $edge_map = array(
-			'::1' => array(0),
-			'127.0.0.1/8' => array(0)
-		);
+		'::1' => array(0),
+		'127.0.0.1/8' => array(0)
+	);
 }
 
