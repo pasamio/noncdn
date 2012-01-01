@@ -1,5 +1,10 @@
 <?php
-
+/**
+ * @package     NonCDN
+ * @subpackage  Master
+ * @copyright   Copyright (C) 2012 Sam Moffatt  
+ * @license     GNU General Public License version 2 or later; see LICENSE
+ */
 namespace NonCDN;
 
 /**
@@ -7,6 +12,7 @@ namespace NonCDN;
  *
  * @package     NonCDN
  * @subpackage  Master
+ * @since       1.0
  */
 class Master_Controller_Base extends BaseController
 {
@@ -32,10 +38,10 @@ class Master_Controller_Base extends BaseController
 		{
 			RequestSupport::terminate(403, 'Access Denied');
 		}
-		
+
 		// At this point we authenticated and authorised the user
 		// Now we need to either send them to an edge or deliver directly
 		$edgeRouter = $this->factory->buildEdgeRouter();
 		$edgeRouter->handleRequest($username, $container, $path);
-	}	
+	}
 }

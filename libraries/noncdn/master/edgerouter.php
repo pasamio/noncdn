@@ -1,5 +1,10 @@
 <?php
-
+/**
+ * @package     NonCDN
+ * @subpackage  Master
+ * @copyright   Copyright (C) 2012 Sam Moffatt  
+ * @license     GNU General Public License version 2 or later; see LICENSE
+ */
 namespace NonCDN;
 
 /**
@@ -8,6 +13,7 @@ namespace NonCDN;
  *
  * @package     NonCDN
  * @subpackage  Master
+ * @since       1.0
  */
 class Master_EdgeRouter
 {
@@ -15,20 +21,19 @@ class Master_EdgeRouter
 	 * @var    Configuration  The configuration for this object.
 	 * @since  1.0
 	 */
-	private $configuration;
-	
+	protected $configuration;
+
 	/**
 	 * @var    Factory  The factory for this object.
 	 * @since  1.0
 	 */
-	private $factory;
-	
+	protected $factory;
+
 	/**
 	 * Constructor
 	 *
 	 * @param   Configuration  $configuration  Configuration object for this instance.
-	 *
-	 * @return  void
+	 * @param   Factory        $factory        Factory object for this instance.
 	 *
 	 * @since   1.0
 	 */
@@ -37,7 +42,7 @@ class Master_EdgeRouter
 		$this->configuration = $configuration;
 		$this->factory = $factory;
 	}
-	
+
 	/**
 	 * Handle a request either directly or via an edge.
 	 *
@@ -52,15 +57,13 @@ class Master_EdgeRouter
 	public function handleRequest($username, $container, $path)
 	{
 		$edgeMap = $this->configuration->getEdgeMap();
-		
+
 		$addr = $_SERVER['REMOTE_ADDR'];
-		$redirect = false;
 		$edges = array();
-		
+
 		// check if we have an exact IP match; great for testing
 		if (isset($edgeMap[$addr]))
 		{
-			$redirect = true;
 			$edges = $edgeMap[$addr];
 		}
 		else
@@ -69,25 +72,25 @@ class Master_EdgeRouter
 			foreach ($edgeMap as $address => $targetEdges)
 			{
 				// TODO: match remote_addr using CIDR
-				//$redirect = true;
-			}			
+				//$edges = $targetEdges;
+			}
 		}
-		
+
 		// if we're doing a redirect, lets handle that
-		if ($redirect && count($edges))
+		if (count($edges))
 		{
 			$edge = $this->buildRoute($edges, $username, $container, $path);
 			header('HTTP/1.1 303 Redirect to edge');
-			header('Location: '. $edge);
+			header('Location: ' . $edge);
 			echo 'Redirecting to edge...<a href="' . $edge . '">' . $edge . '</a>';
 			exit;
 		}
-		
+
 		// so no redirect which means we just deliver locally
-		$file = JPATH_ROOT.'/data/'. $container.'/'.$path;
+		$file = JPATH_ROOT . '/data/' . $container . '/' . $path;
 		readfile($file);
 	}
-	
+
 	/**
 	 * Build a route for a user to their requested item given a set of edges.
 	 *
@@ -104,9 +107,9 @@ class Master_EdgeRouter
 	{
 		$edgeServers = $this->configuration->getEdgeServers();
 		$edgeId = $edges[rand(0, count($edges) - 1)];
-		
+
 		$token = $this->factory->buildTokenService()->generateToken($username, $edgeId);
-		
-		return $edgeServers[$edgeId]."auth/$username/$token/$container/$path";
+
+		return $edgeServers[$edgeId] . "auth/$username/$token/$container/$path";
 	}
 }
