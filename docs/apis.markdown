@@ -223,6 +223,15 @@ Note: any deny is a hard deny. Access checks against a resource that has a deny 
 - container: Container to validate access against
 - roles: A set of rules to validate access
 
+Response:
+- check for access: can be one of three states:
+  - unknown
+  - deny
+  - allow
+- status code/message
+
+Note: any deny is a hard deny.
+
 #### /container/check_user_access
 - container: Container to validate access against
 - username: A username to check access against
