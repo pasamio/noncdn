@@ -10,7 +10,7 @@ define('DS', DIRECTORY_SEPARATOR);
 
 // Load and setup the Joomla! class loader
 require JPATH_PLATFORM.'/import.php';
-require __DIR__.'/libraries/joomla-backports/import.php';
+require __DIR__.'/libraries/import.php';
 
 // Load the PSR-0 Class Loader and setup NonCDN namespace
 require __DIR__.'/libraries/psrloader.php';
