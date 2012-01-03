@@ -67,4 +67,29 @@ class Master_Configuration extends Configuration
 		}
 		return array();
 	}
+	
+	public function getDataStore()
+	{
+		if (!isset($this->configuration->data_store))
+		{
+			throw new Exception('Data store missing from master configuration file');
+		}
+		return $this->configuration->data_store;
+	}
+	
+	/**
+	 * Get the path to the master database.
+	 *
+	 * @return  string  The path to the master database.
+	 *
+	 * @since   1.0
+	 */ 
+	public function getMasterDBPath()
+	{
+		if (!isset($this->configuration->masterdb))
+		{
+			throw new Exception('Missing master database in configuration file.');
+		}
+		return $this->configuration->masterdb;
+	}
 }

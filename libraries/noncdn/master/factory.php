@@ -14,4 +14,21 @@ class Master_Factory extends Factory
 	{
 		return new Master_EdgeRouter($this->configuration, $this);
 	}
+	
+	public function buildDatabaseConnector()
+	{
+		$db = \JDatabase::getInstance(
+			array(
+				'driver' => 'pdo',
+				'database' => $this->configuration->getMasterDBPath()
+			)
+		);
+		return $db;
+	}
+	
+	public function buildContainer()
+	{
+		$db = $this->buildDatabaseConnector();
+		return new Container($db);
+	}
 }

@@ -2,8 +2,8 @@
 /**
  * @package     NonCDN
  * @subpackage  Manager
- * @copyright   2012 - Sam Moffatt  
- * @license     GPL http://www.gnu.org/copyleft/gpl.html
+ * @copyright   Copyright (C) 2012 Sam Moffatt  
+ * @license     GNU General Public License version 2 or later; see LICENSE
  */
 defined('NONCDN') or die();
 

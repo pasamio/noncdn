@@ -86,9 +86,11 @@ class Master_EdgeRouter
 			exit;
 		}
 
+
 		// so no redirect which means we just deliver locally
-		$file = JPATH_ROOT . '/data/' . $container . '/' . $path;
-		readfile($file);
+		$container = $this->factory->buildContainer()->loadContainerByName($container);
+		$file = $container->getFileByPath($path);
+		readfile($file->getFilePath($this->configuration->getDataStore()));
 	}
 
 	/**
