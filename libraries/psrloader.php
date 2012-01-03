@@ -130,7 +130,20 @@ class SplClassLoader
             }
             $fileName .= str_replace('_', DIRECTORY_SEPARATOR, $className) . $this->_fileExtension;
             $fileName = strtolower($fileName);
-            require ($this->_includePath !== null ? $this->_includePath . DIRECTORY_SEPARATOR : '') . $fileName;
+            $includePath = ($this->_includePath !== null ? $this->_includePath . DIRECTORY_SEPARATOR : '');
+
+            $namespaceName = strtolower($namespace);
+            $baseName = strtolower($className); 
+            $testPath = $includePath.$namespaceName.DIRECTORY_SEPARATOR.$baseName;
+            if (is_dir($testPath));
+            {
+		if (file_exists($testPath . DIRECTORY_SEPARATOR . $baseName .'.php'))
+                {
+                    $includePath = $testPath . DIRECTORY_SEPARATOR;
+                    $fileName = $baseName . '.php';
+                }
+            }
+            require $includePath . $fileName;
         }
     }
 }
