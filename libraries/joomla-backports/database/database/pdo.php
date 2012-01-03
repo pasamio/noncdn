@@ -36,14 +36,14 @@ class JDatabasePDO extends JDatabase
 	 *
 	 * @var string
 	 */
-	var $_nullDate		= '0000-00-00 00:00:00';
+	var $nullDate		= '0000-00-00 00:00:00';
 
 	/**
 	 * Quote for named objects
 	 *
 	 * @var string
 	 */
-	var $_nameQuote		= '`';
+	var $nameQuote		= "'";
 
 	/**
 	* Database object constructor
@@ -205,6 +205,7 @@ class JDatabasePDO extends JDatabase
 		$this->_errorNum = 0;
 		$this->_errorMsg = '';
 		$this->_lastsql = $sql;
+		
 		$this->_cursor = $this->_resource->query( $sql );
 
 		if (!$this->_cursor)
@@ -234,7 +235,7 @@ class JDatabasePDO extends JDatabase
 	 */
 	function getAffectedRows()
 	{
-		return false; // ??
+		return $this->_cursor->rowCount();
 	}
 
 	/**
@@ -323,7 +324,14 @@ class JDatabasePDO extends JDatabase
 	 */
 	function getNumRows( $cur=null )
 	{
-		return $cur->rowCount();
+		if (!is_null($cur))
+		{
+			return $cur->rowCount();
+		}
+		else
+		{
+			return $this->_cursor->rowCount();
+		}
 	}
 
 	/**
