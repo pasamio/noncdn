@@ -191,11 +191,6 @@ class JDatabasePDO extends JDatabase
 			return false;
 		}
 
-		if(stripos('INSERT', $this->sql)) {
-			if(stripos('jos_user', $this->sql)) {
-				die($this->sql);
-			}
-		}
 		// Take a local copy so that we don't modify the original query and cause issues later
 		$sql = $this->sql;
 		$sql = str_replace("'0'", 'NULL', $sql); // dodgy!
@@ -524,14 +519,23 @@ class JDatabasePDO extends JDatabase
 			$fields[] = $this->nameQuote( $k );
 			$values[] = $this->isQuoted( $k ) ? $this->Quote( $v ) : (int) $v;
 		}
-		$this->setQuery( sprintf( $fmtsql, implode( ",", $fields ) ,  implode( ",", $values ) ) );
+
+		if (count($fields))
+		{
+			$this->setQuery( sprintf( $fmtsql, implode( ",", $fields ) ,  implode( ",", $values ) ) );
+		}
+		else
+		{
+			// we can't insert an empty value using a query that'd work with mysql
+			// but we can do this and it will work
+			$this->setQuery('INSERT INTO ' . $this->nameQuote($table) . ' DEFAULT VALUES');
+		}
 
 		if (!$this->query()) {
 			return false;
 		}
 		$id = $this->insertid();
-		$ignore = Array('#__session');
-		//if(!in_array($table, $ignore))		die($table .' insert id: '. $id.';; '. $this->_lastsql);
+		
 		if ($keyName && $id) {
 			$object->$keyName = $id;
 		}
@@ -612,7 +616,7 @@ class JDatabasePDO extends JDatabase
 	 */
 	function getTableList()
 	{
-		$this->setQuery( '.tables' );
+		$this->setQuery("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY 'name'");
 		return $this->loadResultArray();
 	}
 
@@ -629,11 +633,9 @@ class JDatabasePDO extends JDatabase
 		$result = array();
 
 		foreach ($tables as $tblval) {
-			$this->setQuery( '.schema ' . $this->getEscaped( $tblval ) );
-			$rows = $this->loadRowList();
-			foreach ($rows as $row) {
-				$result[$tblval] = $row[1];
-			}
+			$this->setQuery( 'SELECT sql FROM sqlite_master WHERE tbl_name = ' . $this->quote( $tblval ) );
+			$row = $this->loadResult();
+			$result[$tblval] = $row;
 		}
 
 		return $result;
@@ -687,49 +689,70 @@ class JDatabasePDO extends JDatabase
 	{
 		if($new)
 		{
-			die('no');
+			return new JDatabaseQueryPDO();
 		}
 		return $this->sql;
 	}
 
 	public function getTableColumns( $table, $typeOnly = true )
 	{
-		return array();
+		$this->setQuery('PRAGMA table_info ('. $table.')');
+		$columns = $this->loadObjectList();
+
+		$results = array();
+		foreach($columns as $column)
+		{
+			if($typeOnly)
+			{
+				$results[$column->name] = $column->type;
+			}
+			else
+			{
+				$results[$column->name] = $column;
+			}
+		}
+		return $results;
 	}
 
 
 	public function getTableKeys( $tables )
 	{
-		return array(); // wtf i don't care about this shit!
-	}
-
-	public function lockTable( $tableName )
-	{
-		die('no');
+die('get table keys');
+		foreach($tables as $table)
+		{
+			
+		}
 	}
 
 	public function renameTable( $oldTable, $newTable, $backup = null, $prefix = null)
 	{
-		die('also no');
+		$this->setQuery('ALTER TABLE ' . $oldTable . ' RENAME TO ' . $newTable);
+		return $this->query(); 
+	}
+
+	public function lockTable( $tableName )
+	{
 	}
 
 	public function transactionCommit()
 	{
-		die('committed');
+		$this->setQuery('COMMIT TRANSACTION');
+		$this->query();
 	}
 
 	public function transactionRollback()
 	{
-		die('transaction committed');
+		$this->setQuery('ROLLBACK TRANSACTION');
+		$this->query();
 	}
 
 	public function transactionStart()
 	{
-		die('aborting');
+		$this->setQuery('BEGIN TRANSACTION');
+		$this->query();
 	}
 
 	public function unlockTables()
 	{
-		die('locking tables indefinitely');
 	}
 }
