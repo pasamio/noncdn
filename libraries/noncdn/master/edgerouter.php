@@ -90,7 +90,9 @@ class Master_EdgeRouter
 		// so no redirect which means we just deliver locally
 		$container = $this->factory->buildContainer()->loadContainerByName($container);
 		$file = $container->getFileByPath($path);
-		readfile($file->getFilePath($this->configuration->getDataStore()));
+		$filePath = $file->getFilePath($this->configuration->getDataStore());
+		header('Content-type: ' . mime_content_type($filePath));
+		readfile($filePath);
 	}
 
 	/**
