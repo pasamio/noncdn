@@ -9,7 +9,7 @@ define('JPATH_ROOT', __DIR__);
 define('JPATH_BASE', __DIR__);
 define('DS', DIRECTORY_SEPARATOR);
 
-// Load and setup the Joomla! class loader
+// Load and setup the Joomla! class loader plus backports and eBay content branch
 require __DIR__.'/libraries/import.php';
 
 // Load the PSR-0 Class Loader and setup NonCDN namespace
