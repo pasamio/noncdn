@@ -2,6 +2,7 @@
 
 class NonCDNConfiguration
 {
-	var $appname = '\NonCDN\Auth';
+	public $appname = '\NonCDN\Auth';
+	public $authdb = 'sqlite:/Users/pasamio/Sites/usq/noncdn/db/auth.db';
 }
 

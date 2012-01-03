@@ -10,10 +10,11 @@ class NonCDNConfiguration
 	public $max_token_age = 12; // hours
 	public $authenticator = '\NonCDN\Authenticator_Basic';
 	public $data_store = '/Users/pasamio/Sites/usq/noncdn/datastore/';
+	public $masterdb = 'sqlite:/Users/pasamio/Sites/usq/noncdn/db/master.db';
 	
 	public $edge_map = array(
-		'::1' => array(0),
-		'127.0.0.1/8' => array(0)
+		//'::1' => array(0),
+		//'127.0.0.1/8' => array(0)
 	);
 }
 

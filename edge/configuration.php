@@ -2,11 +2,12 @@
 
 class NonCDNConfiguration
 {
-	var $appname = '\NonCDN\Edge';
-	var $edge_secret = 'usq';
-	var $edge_id = 0;
-	var $auth_servers = Array('http://localhost/~pasamio/usq/noncdn/auth/');
-	var $master_servers = Array('http://localhost/~pasamio/usq/master/');
-	var $max_token_age = 12; // hours
+	public $appname = '\NonCDN\Edge';
+	public $edge_secret = 'usq';
+	public $edge_id = 0;
+	public $auth_servers = Array('http://localhost/~pasamio/usq/noncdn/auth/');
+	public $master_servers = Array('http://localhost/~pasamio/usq/master/');
+	public $max_token_age = 12; // hours
+	public $edgedb = 'sqlite:/Users/pasamio/Sites/usq/noncdn/db/edge.db';
 }
 
