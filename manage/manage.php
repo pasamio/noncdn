@@ -61,7 +61,7 @@ class NonCDN_Manager extends JCli
 		$controller = new $controllerName($this);
 		$controller->execute();
 	}
-	
+
 	/**
 	 * Method to load a PHP configuration class file based on convention and return the instantiated data object.  You
 	 * will extend this method in child classes to provide configuration data from whatever data source is relevant
@@ -80,7 +80,7 @@ class NonCDN_Manager extends JCli
 		if (empty($file))
 		{
 			$configurationFile = $this->input->get('configuration');
-		
+
 			if (!empty($configurationFile))
 			{
 				if (file_exists($configurationFile))
@@ -96,7 +96,7 @@ class NonCDN_Manager extends JCli
 			{
 				// if a configuration file isn't specified, configure based on default Git repo layout
 				$root = dirname(__DIR__);
-				
+
 				if (isset($this->input->args[0]) && strlen($this->input->args[0]))
 				{
 					$testPath = $root . '/' . $this->input->args[0] . '/configuration.php';
@@ -105,12 +105,19 @@ class NonCDN_Manager extends JCli
 						$file = $testPath;
 					}
 				}
-				
-			}		
+			}
 		}
 		return parent::fetchConfigurationData($file, $class);
 	}
 }
 
-// execute this application
-JCli::getInstance('NonCDN_Manager')->execute();
+try
+{
+	// execute this application
+	JCli::getInstance('NonCDN_Manager')->execute();
+}
+catch (Exception $e)
+{
+	echo "Fatal error: " . $e->getMessage() . "\n";
+	exit(1);
+}

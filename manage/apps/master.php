@@ -76,7 +76,12 @@ class MasterController extends Controller
 	 */
 	protected function getDBConnection()
 	{
-		$db = JDatabase::getInstance(array('driver'=>'pdo', 'database'=>'sqlite:/Users/pasamio/Sites/usq/noncdn/db/master.db'));
+		$db = JDatabase::getInstance(
+			array(
+				'driver' => 'pdo',
+				'database' => 'sqlite:/Users/pasamio/Sites/usq/noncdn/db/master.db'
+			)
+		);
 		return $db;
 	}
 
@@ -264,45 +269,40 @@ class MasterController extends Controller
 		}
 		$this->out('Adding ' . basename($source) . ' to ' . dirname($destination) . ' in ' . $container);
 
-		$this->out('Hashing file...');
-		$hash = sha1_file($source);
+		$container->addFileFromPath($source, $destination);
+	}
 
-		$this->out('File hash: ' . $hash);
-
-		$file = new \NonCDN\File($db);
-		$file->loadFileByHash($hash);
-
-		if ($file->file_id)
+	/**
+	 * Remove file from container
+	 *
+	 * @return  void
+	 *
+	 * @since   1.0
+	 */
+	public function remove_file()
+	{
+		// validate the arg count
+		if (count($this->input->args) < 4)
 		{
-			// file already in content store
-			$this->out("File exists in content store, relinking");
-			$container->addFile($file, $destination);
+			$this->out("Usage: {$this->executable} master remove_file [container name] [path]");
+			exit(1);
 		}
-		else
+
+		// grab some values
+		$container_name = strtolower($this->input->args[2]);
+		$path = $this->input->args[3];
+
+		$db = $this->getDBConnection();
+		$container = new \NonCDN\Container($db);
+		$container->loadContainerByName($container_name);
+		// validate our container exists
+		if (!$container->container_id)
 		{
-			jimport('joomla.filesystem.folder');
-			jimport('joomla.filesystem.file');
-
-			// A new file
-			// Step 1: Add a new file entry
-			$file->create();
-			$file->setBaseDir($this->get('data_store'));
-
-			// Step 2: Copy to content store
-			$filePath = $file->getFilePath($this->get('data_store'));
-			if (!JFolder::create(dirname($filePath)))
-			{
-				$this->out("Failed to create folder: " . dirname($filePath));
-				exit(1);
-			}
-			JFile::copy($source, $filePath);
-
-			$file->file_hash = $hash;
-			$file->file_size = filesize($filePath);
-			$file->use_count = 0;
-			$file->update();
-
-			$this->out("File added to content store with ID {$file->file_id}");
+			$this->out("Invalid container specified.");
+			exit(1);
 		}
+
+		$file = $container->getFileByPath($path);
+		$container->removeFile($file, $path);
 	}
 }
