@@ -175,8 +175,8 @@ class JDatabasePDO extends JDatabase
 		return $result;
 	}
 	
-	function quote( $text ) {
-		return $this->_resource->quote( $text );
+	function quote( $text, $escape = true ) {
+		return $this->_resource->quote($escape ? $this->escape($text) : $text);
 	}
 
 	/**
@@ -391,73 +391,25 @@ class JDatabasePDO extends JDatabase
 	}
 
 	/**
-	* Load a assoc list of database rows
-	*
-	* @access	public
-	* @param string The field name of a primary key
-	* @return array If <var>key</var> is empty as sequential list of returned records.
-	*/
-	function loadAssocList( $key='' )
-	{
-		if (!($cur = $this->query())) {
-			return null;
-		}
-		$array = array();
-		while ($row = $cur->fetch(PDO::FETCH_ASSOC)) {
-			if ($key) {
-				$array[$row[$key]] = $row;
-			} else {
-				$array[] = $row;
-			}
-		}
-		unset( $cur );
-		return $array;
-	}
-
-	/**
 	* This global function loads the first row of a query into an object
 	*
 	* @access	public
 	* @return 	object
 	*/
-	function loadObject( )
+	function loadObject($class = 'stdClass')
 	{
-		if (!($cur = $this->query())) {
+		if (!($cur = $this->query()))
+		{
 			return null;
 		}
 		$ret = null;
-		if ($object = $cur->fetch(PDO::FETCH_OBJ)) {
+		if ($object = $cur->fetch(PDO::FETCH_OBJ))
+		{
 			$ret = $object; // array to object!
 		}
+		
 		unset( $cur );
 		return $ret;
-	}
-
-	/**
-	* Load a list of database objects
-	*
-	* If <var>key</var> is not empty then the returned array is indexed by the value
-	* the database key.  Returns <var>null</var> if the query fails.
-	*
-	* @access	public
-	* @param string The field name of a primary key
-	* @return array If <var>key</var> is empty as sequential list of returned records.
-	*/
-	function loadObjectList( $key='' )
-	{
-		if (!($cur = $this->query())) {
-			return null;
-		}
-		$array = array();
-		while ($row = $cur->fetch(PDO::FETCH_OBJ)) {
-			if ($key) {
-				$array[$row->$key] = $row;
-			} else {
-				$array[] = $row;
-			}
-		}
-		unset( $cur );
-		return $array;
 	}
 
 	/**
@@ -675,22 +627,36 @@ class JDatabasePDO extends JDatabase
 
 	public function fetchArray( $cursor = null )
 	{
-		return array();
+		$ret = null;
+		if ($array = $cursor->fetch(PDO::FETCH_NUM)) {
+			$ret = $array;
+		}
+		return $ret;
+
 	}
 
 	public function fetchAssoc( $cursor = null )
 	{
-		return array();
+		$ret = null;
+		if ($array = $cursor->fetch(PDO::FETCH_ASSOC)) {
+			$ret = $array;
+		}
+		return $ret;
 	}
 
 	public function fetchObject( $cursor = null, $class = 'stdClass' )
 	{
-		return new $class;
+		$ret = null;
+		if ($object = $cursor->fetch(PDO::FETCH_OBJ))
+		{
+			$ret = $object; // array to object!
+		}
+		return $ret;
 	}
 
 	public function freeResult( $cursor = null )
 	{
-		// ?
+		unset($cursor);
 	}
 
 	public function getQuery( $new = false )
@@ -725,7 +691,7 @@ class JDatabasePDO extends JDatabase
 
 	public function getTableKeys( $tables )
 	{
-die('get table keys');
+		die('get table keys');
 		foreach($tables as $table)
 		{
 			
@@ -740,6 +706,12 @@ die('get table keys');
 
 	public function lockTable( $tableName )
 	{
+		return true;
+	}
+
+	public function unlockTables()
+	{
+		return true;
 	}
 
 	public function transactionCommit()
@@ -758,9 +730,5 @@ die('get table keys');
 	{
 		$this->setQuery('BEGIN TRANSACTION');
 		$this->query();
-	}
-
-	public function unlockTables()
-	{
 	}
 }
