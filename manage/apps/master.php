@@ -2,8 +2,8 @@
 /**
  * @package     NonCDN
  * @subpackage  Manager
- * @copyright   Copyright (C) 2012 Sam Moffatt  
- * @license     GNU General Public License version 2 or later; see LICENSE
+ * @copyright   2012 - Sam Moffatt  
+ * @license     GPL http://www.gnu.org/copyleft/gpl.html
  */
 defined('NONCDN') or die();
 
@@ -45,10 +45,20 @@ class MasterController extends Controller
 			exit(1);
 		}
 
-		// :D
+		// check we support the command
 		if (method_exists($this, $command))
 		{
-			$this->$command();
+			// check it's public
+			$method = new ReflectionMethod($this, $command);
+			if ($method->isPublic())
+			{
+				$this->$command();
+			}
+			else
+			{
+				$this->out('Invalid command specified');
+				exit(1);
+			}
 		}
 		else
 		{
@@ -64,30 +74,34 @@ class MasterController extends Controller
 	 *
 	 * @since   1.0
 	 */
-	public function getConnection()
+	protected function getDBConnection()
 	{
 		$db = JDatabase::getInstance(array('driver'=>'pdo', 'database'=>'sqlite:/Users/pasamio/Sites/usq/noncdn/db/master.db'));
 		return $db;
 	}
 
+	// ---------------------------------------------------------------------------------------------
+	// CONTAINER MANAGEMENT CODE
+	// ---------------------------------------------------------------------------------------------
+
 	/**
-	 * Add a container to the system.
+	 * Create a new container in the system.
 	 *
 	 * @return  void
 	 *
 	 * @since   1.0
 	 */
-	public function add_container()
+	public function create_container()
 	{
 		if (count($this->input->args) < 3)
 		{
-			$this->out("Usage: {$this->executable} master add_container [container name] [--description=description]");
+			$this->out("Usage: {$this->executable} master create_container [container name] [--description=description]");
 			exit(1);
 		}
 
-		$container = $this->input->args[2];
-		$this->out("Adding a new container '$container'...");
-		$db = $this->getConnection();
+		$container = strtolower($this->input->args[2]);
+		$this->out("Creating a new container '$container'...");
+		$db = $this->getDBConnection();
 		$containerObj = new stdClass;
 		$containerObj->container_name = $container;
 		$containerObj->description = $this->input->get('description');
@@ -100,7 +114,80 @@ class MasterController extends Controller
 		}
 		catch (JDatabaseException $e)
 		{
-			$this->out('Failed to add container: ' . $e->getMessage());
+			$this->out('Failed to create container: ' . $e->getMessage());
+		}
+	}
+
+	/**
+	 * List containers available in the system
+	 *
+	 * @return  void
+	 *
+	 * @since   1.0
+	 */
+	public function list_containers()
+	{
+		$db = $this->getDBConnection();
+		$query = $db->getQuery(1);
+		$query->select('*')->from('containers');
+		$db->setQuery($query);
+
+		$containers = $db->loadObjectList();
+
+		foreach ($containers as $container)
+		{
+			$this->out("{$container->container_id}\t{$container->container_name}\t\t{$container->description}");
+		}
+	}
+
+	/**
+	 * Alter a container in the system.
+	 *
+	 * @return  void
+	 *
+	 * @since   1.0
+	 */
+	public function alter_container()
+	{
+		if (count($this->input->args) < 3)
+		{
+			$this->out("Usage: {$this->executable} master alter_container [container name] [--description=description]");
+			exit(1);
+		}
+
+		$container = strtolower($this->input->args[2]);
+		$db = $this->getDBConnection();
+		$query = $db->getQuery(true);
+
+		$query->select('container_id')->from('containers')->where('container_name = ' . $db->quote($container));
+		$db->setQuery($query);
+		try
+		{
+			$container_id = $db->loadResult();
+
+			if (empty($container_id))
+			{
+				throw new Exception("Container $container doesn't exist.");
+			}
+		}
+		catch (Exception $e)
+		{
+			$this->out('Failed to alter container: ' . $e->getMessage());
+		}
+
+		$containerObj = new stdClass;
+		$containerObj->container_id = $container_id;
+		$containerObj->container_name = strtolower($this->input->get('container_name', $container));
+		$containerObj->description = $this->input->get('description', null, 'raw');
+		$containerObj->expiry = $this->input->get('expiry', null);
+
+		try
+		{
+			$db->updateObject('containers', $containerObj, 'container_id');
+		}
+		catch (JDatabaseException $e)
+		{
+			$this->out('Failed to alter container: ' . $e->getMessage());
 		}
 	}
 
@@ -119,9 +206,9 @@ class MasterController extends Controller
 			exit(1);
 		}
 
-		$container = $this->input->args[2];
+		$container = strtolower($this->input->args[2]);
 		$this->out("Deleting container '$container'...");
-		$db = $this->getConnection();
+		$db = $this->getDBConnection();
 		$db->setQuery('DELETE FROM containers WHERE container_name = "' . $container . '"');
 
 		try
@@ -132,6 +219,90 @@ class MasterController extends Controller
 		catch (JDatabaseException $e)
 		{
 			$this->out('Failed to remove container: ' . $e->getMessage());
+		}
+	}
+
+	// ---------------------------------------------------------------------------------------------
+	// CONTAINER CONTENT MANAGEMENT CODE
+	// ---------------------------------------------------------------------------------------------
+
+	/**
+	 * Add file to container
+	 *
+	 * @return  void
+	 *
+	 * @since   1.0
+	 */
+	public function add_file()
+	{
+		// validate the arg count
+		if (count($this->input->args) < 5)
+		{
+			$this->out("Usage: {$this->executable} master add_file [container name] [source] [destination]");
+			exit(1);
+		}
+
+		// grab some values
+		$container_name = strtolower($this->input->args[2]);
+		$source = $this->input->args[3];
+		$destination = $this->input->args[4];
+
+		// validate our input file exists
+		if (!file_exists($source))
+		{
+			$this->out("Source file missing!");
+			exit(1);
+		}
+		$db = $this->getDBConnection();
+		$container = new \NonCDN\Container($db);
+		$container->loadContainerByName($container_name);
+		// validate our container exists
+		if (!$container->container_id)
+		{
+			$this->out("Invalid container specified.");
+			exit(1);
+		}
+		$this->out('Adding ' . basename($source) . ' to ' . dirname($destination) . ' in ' . $container);
+
+		$this->out('Hashing file...');
+		$hash = sha1_file($source);
+
+		$this->out('File hash: ' . $hash);
+
+		$file = new \NonCDN\File($db);
+		$file->loadFileByHash($hash);
+
+		if ($file->file_id)
+		{
+			// file already in content store
+			$this->out("File exists in content store, relinking");
+			$container->addFile($file, $destination);
+		}
+		else
+		{
+			jimport('joomla.filesystem.folder');
+			jimport('joomla.filesystem.file');
+
+			// A new file
+			// Step 1: Add a new file entry
+			$file->create();
+			$file->setBaseDir($this->get('data_store'));
+
+			// Step 2: Copy to content store
+			$filePath = $file->getFilePath($this->get('data_store'));
+			if (!JFolder::create(dirname($filePath)))
+			{
+				$this->out("Failed to create folder: " . dirname($filePath));
+				exit(1);
+			}
+			JFile::copy($source, $filePath);
+
+			$file->file_hash = $hash;
+			$file->file_size = filesize($filePath);
+			$file->use_count = 0;
+			$file->update();
+
+			$this->out("File added to content store with ID {$file->file_id}");
 		}
 	}
 }
