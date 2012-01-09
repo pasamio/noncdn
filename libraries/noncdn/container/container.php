@@ -30,6 +30,31 @@ class Container extends \JDatabaseObject
 		'primary' => array('primary' => 'container_id')
 		);
 
+	/** @var    string  Path to the data store.
+	 *  @since  1.0
+	 */
+	protected $dataStore = '';
+
+	/**
+	 * Method to instantiate a database object.
+	 *
+	 * @param   mixed  $db       An optional argument to provide dependency injection for the
+	 *                           database adapter.  If the argument is a JDatabase adapter that
+	 *                           object will become the database adapter, otherwise the default 
+	 *                           adapter will be used.
+	 * @param   array  $options  A set of options to set for this container.
+	 *
+	 * @since   12.1
+	 * @throws  LogicException
+	 */
+	public function __construct(\JDatabase $db = null, $options = array())
+	{
+		$this->dataStore = isset($options['dataStore']) ? $options['dataStore'] : '';
+
+		// call the parent construct
+		parent::__construct($db);
+	}
+
 	/**
 	 * Load this container by name.
 	 *
@@ -65,6 +90,7 @@ class Container extends \JDatabaseObject
 	 */
 	public function addFile(File $file, $path)
 	{
+		$path = '/' . ltrim($path, '/');
 		$query = $this->db->getQuery(1);
 
 		// look for the file first
@@ -78,11 +104,14 @@ class Container extends \JDatabaseObject
 
 		if (!$this->db->loadResult())
 		{
+			$basePath = str_replace('//', '/', dirname($path) . '/');
+
 			$data = (object) array(
 				'file_id' => (int) $file->file_id,
 				'container_id' => (int) $this->container_id,
-				'path' => dirname($path),
-				'filename' => basename($path)
+				'path' => $basePath,
+				'filename' => basename($path),
+				'depth' => substr_count($basePath, '/')
 			);
 
 			$result = $this->db->insertObject('container_file', $data);
@@ -126,22 +155,23 @@ class Container extends \JDatabaseObject
 			// A new file
 			// Step 1: Add a new file entry
 			$file->create();
-			$file->setBaseDir($this->get('data_store'));
+			$file->setBaseDir($this->dataStore);
 
 			// Step 2: Copy to content store
-			$filePath = $file->getFilePath($this->get('data_store'));
-			if (!JFolder::create(dirname($filePath)))
+			$filePath = $file->getFilePath($this->dataStore);
+			if (!\JFolder::create(dirname($filePath)))
 			{
 				throw new Exception("Failed to create folder: " . dirname($filePath));
 			}
-			JFile::copy($source, $filePath);
+			\JFile::copy($source, $filePath);
 
 			$file->file_hash = $hash;
 			$file->file_size = filesize($filePath);
+			$file->file_mime = MimeSniffer::detectMimeFromFile($filePath);
 			$file->use_count = 0;
 			$file->update();
 
-			$container->addFile($file, $destination);
+			$this->addFile($file, $destination);
 		}
 		return true;
 	}
@@ -197,7 +227,7 @@ class Container extends \JDatabaseObject
 		// look for the file first
 		$query->select('file_id')->from('container_file')
 			->where('container_id = ' . (int) $this->container_id)
-			->where('path = ' . $this->db->quote(dirname($path)))
+			->where('path = ' . $this->db->quote('/' . trim(dirname($path), '/') . '/'))
 			->where('filename = ' . $this->db->quote(basename($path)));
 		$this->db->setQuery($query);
 
@@ -210,5 +240,62 @@ class Container extends \JDatabaseObject
 			return $file;
 		}
 		throw new Exception("File not found");
+	}
+
+	/**
+	 * Get a list of files in a container
+	 *
+	 * @param   string   $basePath  The base path for searching.
+	 * @param   integer  $maxDepth  The maximum depth relative to the basePath.
+	 *
+	 * @return  array  The files in this container
+	 *
+	 * @since   1.0
+	 */
+	public function getFiles($basePath='', $maxDepth=0)
+	{
+		if (strlen($basePath))
+		{
+			$basePath = '/' . trim($basePath, '/') . '/';
+			$basePath = str_replace('//', '/', $basePath);
+		}
+
+		// normalise maxDepth
+		if ($maxDepth < 0)
+		{
+			$maxDepth = 0;
+		}
+
+		$query = $this->db->getQuery(1);
+
+		$baseDepth = 1;
+		if ($maxDepth)
+		{
+			// if we have a maxDepth we need to find the first level
+			$query->select('depth')->from('container_file');
+
+			if (strlen($basePath))
+			{
+				$query->where('path = ' . $this->db->quote($basePath));
+			}
+			$this->db->setQuery($query);
+			$baseDepth = $this->db->loadResult();
+		}
+
+		$query->select('file_id, path, filename')->from('container_file')->where('container_id = ' . $this->container_id);
+
+		if ($maxDepth)
+		{
+			$query->where('depth < ' . ($baseDepth + $maxDepth));
+		}
+
+		if (strlen($basePath))
+		{
+			$query->where('path LIKE ' . $this->db->quote($basePath . '%'));
+		}
+
+		$this->db->setQuery($query);
+
+		return $this->db->loadObjectList();
 	}
 }
