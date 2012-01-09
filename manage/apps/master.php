@@ -32,7 +32,7 @@ class MasterController extends Controller
 	{
 		if (count($this->input->args) < 2)
 		{
-			$this->out("Usage: {$this->executable} master [command] [options]");
+			$this->out("Usage: {$this->executable} master <command> [options]");
 			exit(1);
 		}
 
@@ -76,13 +76,7 @@ class MasterController extends Controller
 	 */
 	protected function getDBConnection()
 	{
-		$db = JDatabase::getInstance(
-			array(
-				'driver' => 'pdo',
-				'database' => 'sqlite:/Users/pasamio/Sites/usq/noncdn/db/master.db'
-			)
-		);
-		return $db;
+		return $this->factory->buildDBConnection();
 	}
 
 	// ---------------------------------------------------------------------------------------------
@@ -100,7 +94,7 @@ class MasterController extends Controller
 	{
 		if (count($this->input->args) < 3)
 		{
-			$this->out("Usage: {$this->executable} master create_container [container name] [--description=description]");
+			$this->out("Usage: {$this->executable} master create_container <container name> [--description=description]");
 			exit(1);
 		}
 
@@ -156,7 +150,7 @@ class MasterController extends Controller
 	{
 		if (count($this->input->args) < 3)
 		{
-			$this->out("Usage: {$this->executable} master alter_container [container name] [--description=description]");
+			$this->out("Usage: {$this->executable} master alter_container <container name> [--description=description]");
 			exit(1);
 		}
 
@@ -207,7 +201,7 @@ class MasterController extends Controller
 	{
 		if (count($this->input->args) < 3)
 		{
-			$this->out("Usage: {$this->executable} master delete_container [container name]");
+			$this->out("Usage: {$this->executable} master delete_container <container name>");
 			exit(1);
 		}
 
@@ -243,7 +237,7 @@ class MasterController extends Controller
 		// validate the arg count
 		if (count($this->input->args) < 5)
 		{
-			$this->out("Usage: {$this->executable} master add_file [container name] [source] [destination]");
+			$this->out("Usage: {$this->executable} master add_file <container name> [source] [destination]");
 			exit(1);
 		}
 
@@ -258,8 +252,8 @@ class MasterController extends Controller
 			$this->out("Source file missing!");
 			exit(1);
 		}
-		$db = $this->getDBConnection();
-		$container = new \NonCDN\Container($db);
+
+		$container = $this->factory->buildContainer();
 		$container->loadContainerByName($container_name);
 		// validate our container exists
 		if (!$container->container_id)
@@ -284,7 +278,7 @@ class MasterController extends Controller
 		// validate the arg count
 		if (count($this->input->args) < 4)
 		{
-			$this->out("Usage: {$this->executable} master remove_file [container name] [path]");
+			$this->out("Usage: {$this->executable} master remove_file <container name> <path>");
 			exit(1);
 		}
 
@@ -292,8 +286,7 @@ class MasterController extends Controller
 		$container_name = strtolower($this->input->args[2]);
 		$path = $this->input->args[3];
 
-		$db = $this->getDBConnection();
-		$container = new \NonCDN\Container($db);
+		$container = $this->factory->buildContainer();
 		$container->loadContainerByName($container_name);
 		// validate our container exists
 		if (!$container->container_id)
@@ -304,5 +297,41 @@ class MasterController extends Controller
 
 		$file = $container->getFileByPath($path);
 		$container->removeFile($file, $path);
+	}
+
+	/**
+	 * List files in a container
+	 *
+	 * @return  void
+	 *
+	 * @since   1.0
+	 */
+	public function list_files()
+	{
+		// validate the arg count
+		if (count($this->input->args) < 3)
+		{
+			$this->out("Usage: {$this->executable} master list_files <container name> [base path]");
+			exit(1);
+		}
+
+		$containerName = $this->input->args[2];
+
+		$basePath = '';
+		if (isset($this->input->args[3]) && strlen($this->input->args[3]))
+		{
+			$basePath = '/' . trim($this->input->args[3], '/') . '/';
+			$basePath = str_replace('//', '/', $basePath);
+		}
+
+		$container = $this->factory->buildContainer();
+		$container->loadContainerByName($containerName);
+
+		$files = $container->getFiles($basePath);
+
+		foreach ($files as $file)
+		{
+			$this->out($file->path . $file->filename);
+		}
 	}
 }
