@@ -56,9 +56,19 @@ class NonCDN_Manager extends JCli
 		}
 		require $controllerFile;
 
+		$factoryFile = __DIR__ . "/factories/$app.php";
+		if (!file_exists($factoryFile))
+		{
+			$this->out('Error loading app factory');
+			exit(2);
+		}
+
+		require $factoryFile;
+
 		// set up the app controller and load it
 		$controllerName = $app . 'Controller';
-		$controller = new $controllerName($this);
+		$factoryName = $app . 'Factory';
+		$controller = new $controllerName($this, new $factoryName($this));
 		$controller->execute();
 	}
 
