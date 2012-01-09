@@ -34,5 +34,6 @@ container_id INTEGER,
 file_id INTEGER,
 path VARCHAR(255),
 filename VARCHAR(100),
+depth INTEGER,
 PRIMARY KEY(container_id, file_id, path, filename)
 );
