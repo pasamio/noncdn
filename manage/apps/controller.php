@@ -25,15 +25,23 @@ class Controller
 	private $_app;
 
 	/**
+	 * @var    Factory  A factory instance for this controller.
+	 * @since  1.0
+	 */
+	protected $factory;
+
+	/**
 	 * Constructor
 	 *
-	 * @param   JApplicationCLI  &$app  A reference to the JApplicationCLI running this instance.
+	 * @param   JApplicationCLI  &$app      A reference to the JApplicationCLI running this instance.
+	 * @param   Factory          &$factory  A reference to the factory object.
 	 *
 	 * @since   1.0
 	 */
-	public function __construct(&$app)
+	public function __construct(&$app, &$factory)
 	{
 		$this->_app = $app;
+		$this->factory = $factory;
 	}
 
 	/**
