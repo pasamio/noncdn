@@ -1,7 +1,19 @@
 <?php
-
+/**
+ * @package     NonCDN
+ * @subpackage  Edge
+ * @copyright   Copyright (C) 2012 Sam Moffatt  
+ * @license     GNU General Public License version 2 or later; see LICENSE
+ */
 namespace NonCDN;
 
+/**
+ * Edge Configuration class
+ *
+ * @package     NonCDN
+ * @subpackage  Edge
+ * @since       1.0
+ */
 class Edge_Configuration extends Configuration
 {
 	/**
@@ -84,5 +96,46 @@ class Edge_Configuration extends Configuration
 		}
 		return 'NonCDN\Edge_Authorisor'; // default authorisor
 	}
+	
+	/**
+	 * Get the path to the edge database.
+	 *
+	 * @return  string  The path to the edge database.
+	 *
+	 * @since   1.0
+	 */ 
+	public function getEdgeDBPath()
+	{
+		if (!isset($this->configuration->edgedb))
+		{
+			throw new Exception('Missing edge database in configuration file.');
+		}
+		return $this->configuration->edgedb;
+	}
+	
+	/**
+	 * Get the edge cache directory
+	 *
+	 * @return  string  The path to the cache directory.
+	 *
+	 * @throws  Exception  If the cache dir is unset, missing or unwritable
+	 *
+	 * @since   1.0
+	 */
+	public function getCacheDir()
+	{
+		if (!isset($this->configuration->cachedir))
+		{
+			throw new Exception('Cache dir not set');
+		}
+		if (!file_exists($this->configuration->cachedir))
+		{
+			throw new Exception('Invalid or missing cache dir specified');
+		}
+		if (!is_writable($this->configuration->cachedir))
+		{
+			throw new Exception('Invalid cache dir specified');
+		}
+		return $this->configuration->cachedir;
+	}
 }
-

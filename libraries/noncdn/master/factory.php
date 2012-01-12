@@ -7,6 +7,13 @@
  */
 namespace NonCDN;
 
+/**
+ * Master Factory
+ *
+ * @package     NonCDN
+ * @subpackage  Master
+ * @since       1.0
+ */
 class Master_Factory extends Factory
 {
 	public function buildAuthenticator()
@@ -35,5 +42,13 @@ class Master_Factory extends Factory
 	{
 		$db = $this->buildDatabaseConnector();
 		return new Container($db);
+	}
+	
+	public function buildFile()
+	{
+		$db = $this->buildDatabaseConnector();
+		$file = new File($db);
+		$file->setBaseDir($this->configuration->getDataStore());
+		return $file;
 	}
 }

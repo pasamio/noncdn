@@ -224,10 +224,14 @@ class Container extends \JDatabaseObject
 	{
 		$query = $this->db->getQuery(1);
 
+		// ensure the path has a / as the prefix
+		$path = '/' . ltrim($path, '/');
+		$basePath = str_replace('//', '/', dirname($path) . '/');
+		
 		// look for the file first
 		$query->select('file_id')->from('container_file')
 			->where('container_id = ' . (int) $this->container_id)
-			->where('path = ' . $this->db->quote('/' . trim(dirname($path), '/') . '/'))
+			->where('path = ' . $this->db->quote($basePath))
 			->where('filename = ' . $this->db->quote(basename($path)));
 		$this->db->setQuery($query);
 
