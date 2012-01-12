@@ -9,5 +9,6 @@ class NonCDNConfiguration
 	public $master_servers = Array('http://localhost/~pasamio/usq/master/');
 	public $max_token_age = 12; // hours
 	public $edgedb = 'sqlite:/Users/pasamio/Sites/usq/noncdn/db/edge.db';
+	public $cachedir = '/Users/pasamio/Sites/usq/noncdn/edgecache';
 }
 
