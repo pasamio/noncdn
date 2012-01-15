@@ -48,10 +48,43 @@ class Edge_Database
 		$query = $this->db->getQuery(1);
 		$query->select('file_id')->from('container_file')
 			->where('container_name = '. $this->db->quote($container))
-			->where('fullpath = '. $this->db->quote($container));
+			->where('fullpath = '. $this->db->quote($path));
 
 		$this->db->setQuery($query);
-		
+
 		return $this->db->loadResult();
+	}
+
+	/**
+	 * Assign a file content ID to a given container and path.
+	 *
+	 * @param   integer  $content_id  The content ID of the file.
+	 * @param   string   $container   The container to find the file.
+	 * @param   string   $path        The path within the container to the file.
+	 *
+	 * @return  boolean  Result of the operation.
+	 *
+	 * @since   1.0
+	 */
+	public function assignFileContentId($content_id, $container, $path)
+	{
+		/* // TODO: Fix this on sqlite
+		$query = $this->db->getQuery(1);
+		$query->insert('container_files')
+			->set('file_id = ' . (int)$content_id)
+			->set('container_name = ' . $this->db->quote($container))
+			->set('fullpath = ' . $this->db->quote($path));
+			
+		$this->db->setQuery($query);
+
+		return $this->db->query();			
+		*/
+		
+		$obj = new \stdClass;
+		$obj->file_id = (int)$content_id;
+		$obj->container_name = $container;
+		$obj->fullpath = $path;
+
+		return $this->db->insertObject('container_file', $obj);
 	}
 }

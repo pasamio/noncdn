@@ -12,7 +12,7 @@ class Edge_Controller_Auth extends BaseController
 	 */
 	public function execute(array $args)
 	{
-		if(count($args) < 5)
+		if(count($args) < 4)
 		{
 			RequestSupport::terminate(500, 'Invalid data');
 		}
@@ -46,7 +46,7 @@ class Edge_Controller_Auth extends BaseController
 		}
 		
 		// we have a valid token, now we need to deliver some content
-		$transport = $this->factory->buildTransport();
-		$transport->deliver($container, $path);
+		$edgeTransport = $this->factory->buildEdgeTransport();
+		$edgeTransport->deliver($container, $path);
 	}
 }

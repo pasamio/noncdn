@@ -36,4 +36,10 @@ class Factory
 	{
 		return new Container_Authoriser($this->configuration);
 	}
+	
+	public function buildTransport()
+	{
+		$transportClass = $this->configuration->getTransport();
+		return new $transportClass($this);
+	}
 }

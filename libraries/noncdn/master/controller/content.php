@@ -66,10 +66,20 @@ class Master_Controller_Content extends Master_Controller_Base
 		$path = $file->getFilePath();
 		
 		header('X-NonCDN-FileMeta: ' . $file);
+		if (strlen($file->file_mime))
+		{
+			header('Content-type: ' . $file->file_mime);
+		}
+
+		if (is_integer($file->file_size) && !empty($file->file_size))
+		{
+			header('Content-length: ' . $file->file_size);			
+		}
 		
-		readfile($path);
+		header('X-Sendfile: ' . $path);
+		//readfile($path);
 	}
-	
+
 	/**
 	 * Handle authenticating a user and then providing them the file.
 	 *

@@ -23,7 +23,7 @@ class Edge_Factory extends Factory
 	 *
 	 * @since   1.0
 	 */
-	public function buildTransport()
+	public function buildEdgeTransport()
 	{
 		return new Edge_Transport($this, $this->configuration->getMasterServers(), $this->configuration->getCacheDir());
 	}
@@ -80,6 +80,19 @@ class Edge_Factory extends Factory
 	 */
 	public function buildMasterClient()
 	{
-		return new Master_Client($this->configuration->getMasterServers());
+		return new Master_Client($this, $this->configuration->getMasterServers());
+	}
+	
+	/**
+	 * Build a file object!
+	 *
+	 * @return  File  Your very own file object!
+	 *
+	 * @since   1.0
+	 */
+	public function buildFile()
+	{
+		$file = new File($this->buildDatabaseConnector());
+		return $file;
 	}
 }

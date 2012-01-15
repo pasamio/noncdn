@@ -26,5 +26,5 @@ interface RoleProvider
 	 *
 	 * @since   1.0
 	 */
-	public function getRoles($username)
+	public function getRoles($username);
 }

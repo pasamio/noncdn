@@ -65,4 +65,16 @@ class Configuration
 	{
 		return $this->configuration->edge_servers;
 	}
+	
+	/**
+	 * Get the configured transport class.
+	 *
+	 * @return  string  The transport class to use.
+	 *
+	 * @since   1.0
+	 */
+	public function getTransport()
+	{
+		return $this->configuration->transport;
+	}
 }

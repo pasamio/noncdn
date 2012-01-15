@@ -31,6 +31,11 @@ class Edge_Transport
 	 */
 	protected $masterServers;
 	
+	/** @var     string  The cache temporary storage directory.
+	 *  @since   1.0
+	 */
+	protected $cacheDir;
+	
 	/** 
 	 * Constructor
 	 *
@@ -70,7 +75,7 @@ class Edge_Transport
 		
 		// clean each part of the path removing any '..' that might be there, filter out empty entries
 		// and then implode it back into a path
-		$path = implode('/', array_filter(array_map(Array('NonCDN\Route', 'cleanPath'), $path), 'strlen'));
+		$path = implode('/', array_filter(array_map(array('NonCDN\Route', 'cleanPath'), $path), 'strlen'));
 
 		// First step: work out if we have this file locally then potentially deliver it
 		$contentId = $this->db->findFileContentId($container, $path);
@@ -80,14 +85,28 @@ class Edge_Transport
 			$this->deliverFileFromPath($this->buildPathFromContentId($contentId));
 			exit(0);
 		}
-		
+
 		// Step 2: ask the master server for this file
 		$contentId = $this->masterClient->getContentId($container, $path);
-		
+
 		if(!empty($contentId))
 		{
 			// look if we have a copy of this file locally already
-			$path = $this->buildPathFromContentId($contentId))
+			$localpath = $this->buildPathFromContentId($contentId);
+			
+			if (file_exists($localpath))
+			{
+				// link this file and this content ID together
+				$this->db->assignFileContentId($contentId, $container, $path);
+				// then send it
+				$this->deliverFileFromPath($localpath);
+				exit(0);
+			}
+			else
+			{
+				$this->streamFile($contentId, $container, $path);
+				exit(0);
+			}
 		}
 		
 		// Step 3: it doesn't exist...soz!
@@ -101,14 +120,46 @@ class Edge_Transport
 	 *
 	 * @since   1.0
 	 */
-	public function streamFile()
+	public function streamFile($contentId, $container, $path)
 	{
-		// :(
+		// use streams to download the file and output to the client simultaneously
+		$fh = $this->masterClient->getContentHandle($contentId);
+
+		if (!$fh)
+		{
+			RequestSupport::terminate(500, 'File access error');
+		}
+		
+		$params = array('outFile'=>$this->buildPathFromContentId($contentId));
+		
+		// Register the stream filter
+		stream_filter_register('noncdn.duplicate', 'NonCDN\Stream_Filter_Duplicate');
+
+		stream_filter_append($fh, 'noncdn.duplicate', STREAM_FILTER_READ, $params);
+		
+		$file = $this->masterClient->extractFileMetaDataFromStream($fh);
+		
+		$file->create();
+		
+		if (strlen($file->file_mime))
+		{
+			header('Content-type: ' . $file->file_mime);
+		}
+
+		if (is_integer($file->file_size) && !empty($file->file_size))
+		{
+			header('Content-length: ' . $file->file_size);			
+		}
+		
+		fpassthru($fh);
+		
+		// last step is to assign this file content ID to the file we just streamed
+		$this->db->assignFileContentId($contentId, $container, $path);
 	}
 	
 	public function buildPathFromContentId($contentId)
 	{
-		$
+		return $this->cacheDir . '/' . $contentId;
 	}
 	
 	/**
