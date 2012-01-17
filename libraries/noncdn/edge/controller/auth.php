@@ -1,9 +1,18 @@
 <?php
-
+/**
+ * @package     NonCDN
+ * @subpackage  Edge
+ * @copyright   Copyright (C) 2012 Sam Moffatt  
+ * @license     GNU General Public License version 2 or later; see LICENSE
+ */
 namespace NonCDN;
 
 /**
- * authentication controller
+ * Edge authentication controller
+ *
+ * @package     NonCDN
+ * @subpackage  Edge
+ * @since       1.0
  */
 class Edge_Controller_Auth extends BaseController
 {
@@ -27,13 +36,18 @@ class Edge_Controller_Auth extends BaseController
 		$token = $filter->clean($token, 'VAR');
 		$container = $filter->clean($container, 'CMD');
 
-		try {	
-			$tokenservice = $this->factory->buildTokenService(Array('check_token_age'=>false));
+		try 
+		{
+			// pass array('check_token_age'=>false) to disable token staleness checks
+			$tokenservice = $this->factory->buildTokenService();
 			$validToken = $tokenservice->validateToken($username, $token);
-		} catch(Exception $e)
+		} 
+		catch(Exception $e)
 		{
 			RequestSupport::terminate(500, 'Token Error');
 		}
+		
+		
 		if(!$validToken)
 		{
 			RequestSupport::terminate(403, 'Invalid Token');

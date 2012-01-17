@@ -171,6 +171,7 @@ class Edge_Transport
 	 */
 	public function deliverFileFromPath($filePath)
 	{
+		//header('Content-Disposition: attachment;filename=' . basename($filePath));
 		// TODO: used the cached mime type from the master node
 		header('Content-type: ' . mime_content_type($filePath));
 		readfile($filePath);
