@@ -10,16 +10,16 @@ namespace NonCDN;
 defined('NONCDN') or die();
 
 /**
- * Default Role Provider
+ * Local Role Provider
  *
  * @package     NonCDN
  * @subpackage  RoleProvider
  * @since       1.0
  */
-class RoleProvider_Default extends RoleProvider
+class RoleProvider_Local extends RoleProvider
 {
 	/**
-	 * Get roles from this provider.
+	 * Get roles from the local database.
 	 *
 	 * @param   string  $username  The username to retrieve roles from.
 	 *
@@ -29,11 +29,25 @@ class RoleProvider_Default extends RoleProvider
 	 */
 	public function getRoles($username)
 	{
-		if (in_array($username, array('pasamio', 'admin')))
+		$db = $this->factory->buildDatabaseConnector();
+		
+		$user = new User($db);
+		$user->loadByUsername($username);
+
+		$query = $db->getQuery(1);
+		$query->select('role_name')->from('roles r')
+			->innerJoin('user_role ur ON r.role_id = ur.role_id')
+			->where('ur.user_id = ' . $user->user_id);
+
+		$db->setQuery($query);
+
+		$results = $db->loadResultArray();
+
+		if (!is_array($results))
 		{
-			return array('USER');
+			$results = array();
 		}
 
-		return array();
+		return $results;
 	}
 }

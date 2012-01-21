@@ -28,7 +28,7 @@ class Auth_Factory extends Factory
 	public function getRoleProvider($user = null)
 	{
 		$roleProviderClass = $this->configuration->getRoleProvider();
-		return new $roleProviderClass($this->configuration);
+		return new $roleProviderClass($this, $this->configuration);
 	}
 
 	/**
@@ -57,5 +57,23 @@ class Auth_Factory extends Factory
 	{
 		$credentialStoreClass = $this->configuration->getCredentialStore();
 		return new $credentialStoreClass($this->configuration);
+	}
+
+	/**
+	 * Build a database connector
+	 *
+	 * @return  Database  A database connector.
+	 *
+	 * @since   1.0
+	 */
+	public function buildDatabaseConnector()
+	{
+		$db = \JDatabase::getInstance(
+			array(
+				'driver' => 'pdo',
+				'database' => $this->configuration->getAuthDBPath()
+			)
+		);
+		return $db;
 	}
 }
