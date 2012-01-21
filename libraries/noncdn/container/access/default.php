@@ -29,8 +29,14 @@ class Container_Access_Default
 	 */
 	public function getRoles($container)
 	{
-		// permit all users access but deny those with the "ABUSIVE_USER" role
+		// permit write to admins
+		// permit read all users access 
+		// deny those with the "ABUSIVE_USER" role
 		// e.g. an "abusive user" could be someone who has bulk accessed items
-		return array('permit' => array('USER'),'deny' => array('ABUSIVE_USER'));
+		return array(
+			'write'=> array('ADMIN'), 
+			'read' => array('USER'),
+			'deny' => array('ABUSIVE_USER')
+			);
 	}
 }
