@@ -76,16 +76,30 @@ class Auth_Controller_User extends BaseController
 		{
 			RequestSupport::terminate(500, 'Missing username');
 		}
-		$roleProvider = $this->factory->getRoleProvider();
 
-		$roles = $roleProvider->getRoles($username);
+		try
+		{
+			$roleProvider = $this->factory->getRoleProvider();
 
-		$this->outputResponse(
-			array(
-				'error' => false,
-				'username' => $username,
-				'roles' => $roles
-			)
-		);
+			$roles = $roleProvider->getRoles($username);
+			
+			$this->outputResponse(
+				array(
+					'error' => false,
+					'username' => $username,
+					'roles' => $roles
+				)
+			);
+		}
+		catch (\Exception $e)
+		{
+			$this->outputResponse(
+				array(
+					'error' => true,
+					'username' => $username,
+					'msg' => $e->getMessage()
+				)
+			);
+		}
 	}
 }
