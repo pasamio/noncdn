@@ -9,13 +9,13 @@
 defined('NONCDN') or die();
 
 /**
- * An X-SendFile powered transport.
+ * Transport interface
  *
  * @package     NonCDN
  * @subpackage  Transport
  * @since       1.0
  */
-class Transport_XSendFile implements Transport
+interface Transport
 {
 	/**
 	 * Deliver a file
@@ -26,8 +26,5 @@ class Transport_XSendFile implements Transport
 	 *
 	 * @since   1.0
 	 */
-	public function deliverFile($path)
-	{
-		header('X-Sendfile: '. $path);
-	}
+	public function deliverFile($path);
 }

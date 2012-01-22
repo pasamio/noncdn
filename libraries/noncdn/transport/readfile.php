@@ -15,7 +15,7 @@ defined('NONCDN') or die();
  * @subpackage  Transport
  * @since       1.0
  */
-class Transport_ReadFile
+class Transport_ReadFile implements Transport
 {
 	/**
 	 * Deliver a file
