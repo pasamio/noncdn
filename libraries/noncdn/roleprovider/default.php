@@ -29,7 +29,8 @@ class RoleProvider_Default extends RoleProvider
 	 */
 	public function getRoles($username)
 	{
-		if (in_array($username, array('pasamio', 'admin')))
+		$valid_users = array('pasamio', 'admin', 'demo');
+		if (in_array($username, $valid_users))
 		{
 			return array('USER');
 		}
