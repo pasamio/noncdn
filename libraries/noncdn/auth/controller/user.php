@@ -79,7 +79,7 @@ class Auth_Controller_User extends BaseController
 
 		try
 		{
-			$roleProvider = $this->factory->getRoleProvider();
+			$roleProvider = $this->factory->buildRoleProvider();
 
 			$roles = $roleProvider->getRoles($username);
 			
