@@ -21,7 +21,7 @@ class Container_Access_Default
 	/**
 	 * Get roles for a given container.
 	 *
-	 * @param   string  $container  The container to retrieve the roles.
+	 * @param   Container  $container  The container to retrieve the roles.
 	 *
 	 * @return  array  An array of roles permitted and denied access.
 	 *
@@ -34,9 +34,11 @@ class Container_Access_Default
 		// deny those with the "ABUSIVE_USER" role
 		// e.g. an "abusive user" could be someone who has bulk accessed items
 		return array(
-			'write'=> array('ADMIN'), 
-			'read' => array('USER'),
-			'deny' => array('ABUSIVE_USER')
+				'write'=> array('ADMIN' => true),
+				'read' => array(
+					'USER' => true,
+					'ABUSIVE_USER' => false
+				)
 			);
 	}
 }
