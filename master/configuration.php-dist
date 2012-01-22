@@ -3,10 +3,10 @@
 class NonCDNConfiguration
 {
 	public $appname = '\NonCDN\Master';
-	public $auth_servers = array('http://localhost/~pasamio/usq/noncdn/auth/');
-	public $edge_servers = array('http://localhost/~pasamio/usq/noncdn/edge/');
+	public $auth_servers = array('http://localhost/~pasamio/usq/noncdn/auth');
+	public $edge_servers = array('http://localhost/~pasamio/usq/noncdn/edge');
 	public $edge_secrets = array('usq');
-	public $master_servers = array('http://localhost/~pasamio/usq/master/');
+	public $master_servers = array('http://localhost/~pasamio/usq/master');
 	public $max_token_age = 12; // hours
 	public $authenticator = '\NonCDN\Authenticator_Basic';
 	public $data_store = '/Users/pasamio/Sites/usq/noncdn/datastore/';
