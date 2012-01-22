@@ -27,9 +27,9 @@ class User extends \JDatabaseObject
 	 *  @since  1.0
 	 */
 	protected $keys = array(
-		'primary' => array('primary'=>'user_id')
+		'primary' => array('primary' => 'user_id')
 		);
-		
+
 	/**
 	 * Load this object by a username
 	 *
@@ -44,11 +44,11 @@ class User extends \JDatabaseObject
 		$query = $this->db->getQuery(1);
 		$query->select('user_id')->from('users')
 			->where('username = ' . $this->db->quote($username));
-		
+
 		$this->db->setQuery($query);
 
 		$userid = $this->db->loadResult();
-		
+
 		if (!$userid)
 		{
 			throw new \InvalidArgumentException('User not found');
