@@ -109,6 +109,23 @@ abstract class Factory
 	}
 
 	/**
+	 * Build a user object.
+	 *
+	 * @param   JDatabase  $db  The DB object to use.
+	 *
+	 * @since   1.0
+	 */
+	public function buildUser($db = null)
+	{
+		if (is_null($db))
+		{
+			$db = $this->buildDatabaseConnector();
+		}
+
+		return new User($db);
+	}
+
+	/**
 	 * Build a client for an auth node.
 	 *
 	 * @return  Client_AuthNode
@@ -127,7 +144,7 @@ abstract class Factory
 	 *
 	 * @since   1.0
 	 */
-	public function buildAuthoriser()
+	public function buildContainerAuthoriser()
 	{
 		return new Container_Authoriser($this->configuration);
 	}
