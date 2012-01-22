@@ -38,7 +38,7 @@ class Edge_Factory extends Factory
 	public function buildAuthorisor()
 	{
 		$authoriserClass = $this->configuration->getAuthorisorClass();
-		return new $authoriserClass($this->configuration->getAuthServers());	
+		return new $authoriserClass($this->configuration->getAuthServers());
 	}
 
 	/**
@@ -70,7 +70,7 @@ class Edge_Factory extends Factory
 		);
 		return $db;
 	}
-	
+
 	/**
 	 * Build a client for communicating with a master node.
 	 *
@@ -81,18 +81,5 @@ class Edge_Factory extends Factory
 	public function buildMasterClient()
 	{
 		return new Master_Client($this, $this->configuration->getMasterServers());
-	}
-	
-	/**
-	 * Build a file object!
-	 *
-	 * @return  File  Your very own file object!
-	 *
-	 * @since   1.0
-	 */
-	public function buildFile()
-	{
-		$file = new File($this->buildDatabaseConnector());
-		return $file;
 	}
 }
