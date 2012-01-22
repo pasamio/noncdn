@@ -157,6 +157,15 @@ class Edge_Transport
 		$this->db->assignFileContentId($contentId, $container, $path);
 	}
 	
+	/**
+	 * Build a path to the cache directory based on the content ID
+	 *
+	 * @param   integer  $contentId  The content ID to retrieve.
+	 *
+	 * @return  string  The path to the file.
+	 *
+	 * @since   1.0
+	 */
 	public function buildPathFromContentId($contentId)
 	{
 		return $this->cacheDir . '/' . $contentId;
