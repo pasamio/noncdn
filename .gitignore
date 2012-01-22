@@ -5,3 +5,4 @@ logs/
 master/configuration.php
 auth/configuration.php
 edge/configuration.php
+.DS_Store
