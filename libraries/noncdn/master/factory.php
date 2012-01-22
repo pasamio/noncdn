@@ -16,17 +16,38 @@ namespace NonCDN;
  */
 class Master_Factory extends Factory
 {
+	/**
+	 * Build an authenticator class
+	 *
+	 * @return  Authenticator
+	 *
+	 * @since   1.0
+	 */
 	public function buildAuthenticator()
 	{
 		$authenticatorClass = $this->configuration->getAuthenticator();
 		return new $authenticatorClass($this->configuration, $this);
 	}
-	
+
+	/**
+	 * Build an edge router
+	 *
+	 * @return  Master_EdgeRouter  The edge router.
+	 *
+	 * @since   1.0
+	 */
 	public function buildEdgeRouter()
 	{
 		return new Master_EdgeRouter($this->configuration, $this);
 	}
-	
+
+	/**
+	 * Build a database connector
+	 *
+	 * @return  JDatabase  A connected database connection
+	 *
+	 * @since   1.0
+	 */
 	public function buildDatabaseConnector()
 	{
 		$db = \JDatabase::getInstance(
@@ -37,17 +58,19 @@ class Master_Factory extends Factory
 		);
 		return $db;
 	}
-	
-	public function buildContainer()
+
+	/**
+	 * Build a file instance and set the base dir for the master node.
+	 *
+	 * @param   JDatabase  $db  The database object
+	 *
+	 * @return  File  A new file object
+	 *
+	 * @since   1.0
+	 */
+	public function buildFile($db = null)
 	{
-		$db = $this->buildDatabaseConnector();
-		return new Container($db);
-	}
-	
-	public function buildFile()
-	{
-		$db = $this->buildDatabaseConnector();
-		$file = new File($db);
+		$file = parent::buildFile($db);
 		$file->setBaseDir($this->configuration->getDataStore());
 		return $file;
 	}
