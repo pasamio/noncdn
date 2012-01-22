@@ -17,7 +17,32 @@ namespace NonCDN;
 class Auth_Factory extends Factory
 {
 	/**
-	 * Get the configured role provider class.
+	 * Build a container access provider class.
+	 *
+	 * @return  Container_Access Container access class.
+	 *
+	 * @since   1.0
+	 */
+	public function buildContainerAccessProvider()
+	{
+		$containerAccessProviderClass = $this->configuration->getContainerAccessProvider();
+		return new $containerAccessProviderClass();
+	}	
+
+	/**
+	 * Build an authoriser.
+	 *
+	 * @return  JAccessAuthoriser  An access validator.
+	 *
+	 * @since   1.0
+	 */
+	public function buildAuthoriser()
+	{
+		return \JAuthorisationFactory::getInstance()->getAuthoriser();
+	}
+
+	/**
+	 * Build the configured role provider class.
 	 *
 	 * @param   string  $user  An optional user to do a provider based on user.
 	 *
@@ -25,25 +50,24 @@ class Auth_Factory extends Factory
 	 *
 	 * @since   1.0
 	 */
-	public function getRoleProvider($user = null)
+	public function buildRoleProvider($user = null)
 	{
 		$roleProviderClass = $this->configuration->getRoleProvider();
 		return new $roleProviderClass($this, $this->configuration);
 	}
-
+	
 	/**
-	 * Get a container access provider class.
+	 * Build a surrogate JAuthorisationRequestor.
 	 *
-	 * @param   string  $container  An optional container to do a provider based on container.
+	 * @param   array  $roles  The roles to use.
 	 *
-	 * @return  RoleProvider  An instance of a RoleProvider.
+	 * @return  AuthorisationSurrogate  Surrogate with the desired roles
 	 *
 	 * @since   1.0
 	 */
-	public function getContainerAccessProvider($container = null)
+	public function buildAuthorisationSurrogate(array $roles)
 	{
-		$containerProviderClass = $this->configuration->getContainerAccessProvider();
-		return new $containerProviderClass($this->configuration);
+		return new AuthorisationSurrogate($roles);	
 	}
 
 	/**
