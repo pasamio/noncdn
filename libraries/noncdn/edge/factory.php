@@ -38,7 +38,7 @@ class Edge_Factory extends Factory
 	public function buildAuthorisor()
 	{
 		$authoriserClass = $this->configuration->getAuthorisorClass();
-		return new $authoriserClass($this->configuration->getAuthServers());
+		return new $authoriserClass($this, $this->configuration->getAuthServers());
 	}
 
 	/**
