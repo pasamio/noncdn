@@ -33,8 +33,8 @@ class Master_Controller_Base extends BaseController
 		$filter = new \JFilterInput;
 		$container = $filter->clean(array_shift($path), 'CMD');
 		$path = $filter->clean(implode('/', $path), 'PATH');
-		$authoriser = $this->factory->buildAuthoriser();
-		if (!$authoriser->check_user_access($container, $username))
+		$authoriser = $this->factory->buildContainerAuthoriser();
+		if (!$authoriser->check_user_access($username, $container))
 		{
 			RequestSupport::terminate(403, 'Access Denied');
 		}
