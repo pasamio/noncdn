@@ -53,17 +53,9 @@ RewriteBase /~pasamio/usq/noncdn/edge
 
 ########## Begin - Joomla! core SEF Section
 #
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} !^/index.php
 RewriteRule (.*) index.php
 RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L]
 #
 ########## End - Joomla! core SEF Section
-
-<FilesMatch "(?<!(index)|(index2))\.php">
-	Order deny,allow
-	Deny from All
-</FilesMatch>
-
 

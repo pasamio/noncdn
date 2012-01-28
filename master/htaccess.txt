@@ -20,7 +20,7 @@
 #####################################################
 
 ##  Can be commented out if causes errors, see notes above.
-Options +FollowSymLinks
+Options +FollowSymLinks -Indexes
 
 #
 #  mod_rewrite in use
@@ -31,8 +31,6 @@ RewriteEngine On
 ## If you experience problems on your site block out the operations listed below
 ## This attempts to block the most common type of exploit `attempts` to Joomla!
 #
-# Block out any script trying to set a mosConfig value through the URL
-RewriteCond %{QUERY_STRING} mosConfig_[a-zA-Z_]{1,21}(=|\%3D) [OR]
 # Block out any script trying to base64_encode crap to send via URL
 RewriteCond %{QUERY_STRING} base64_encode.*\(.*\) [OR]
 # Block out any script that includes a <script> tag in URL
@@ -55,18 +53,8 @@ RewriteBase /~pasamio/usq/noncdn/master
 
 ########## Begin - Joomla! core SEF Section
 #
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} !^/index.php
-RewriteCond %{REQUEST_URI} (/|\.php|\.html|\.htm|\.feed|\.pdf|\.raw|/[^.]*)$  [NC]
 RewriteRule (.*) index.php
 RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L]
 #
 ########## End - Joomla! core SEF Section
-
-#<FilesMatch "(?<!(index)|(index2))\.php">
-#	Order deny,allow
-#	Deny from All
-#</FilesMatch>
-
-Options -Indexes
