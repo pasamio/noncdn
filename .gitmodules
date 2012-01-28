@@ -3,4 +3,4 @@
 	url = git://github.com/joomla/joomla-platform.git
 [submodule "libraries/ebay-content"]
 	path = libraries/ebay-content
-	url = https://github.com/eBaySF/joomla-platform.git
+	url = git://github.com/eBaySF/joomla-platform.git
