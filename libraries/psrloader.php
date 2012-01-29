@@ -1,149 +1,237 @@
-<?php
-
 /**
  * SplClassLoader implementation that implements the technical interoperability
  * standards for PHP 5.3 namespaces and class names.
  *
- * http://groups.google.com/group/php-standards/web/final-proposal
+ * https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md
  *
- *     // Example which loads classes for the Doctrine Common package in the
- *     // Doctrine\Common namespace.
- *     $classLoader = new SplClassLoader('Doctrine\Common', '/path/to/doctrine');
- *     $classLoader->register();
+ * Example usage:
  *
+ *     $classLoader = new \SplClassLoader();
+ *
+ *     // Configure the SplClassLoader to act normally or silently
+ *     $classLoader->setMode(\SplClassLoader::MODE_NORMAL);
+ *
+ *     // Add a namespace of classes
+ *     $classLoader->add('Doctrine', array(
+ *         '/path/to/doctrine-common', '/path/to/doctrine-dbal', '/path/to/doctrine-orm'
+ *     ));
+ *
+ *     // Add a prefix
+ *     $classLoader->add('Swift', '/path/to/swift');
+ *
+ *     // Add a prefix through PEAR1 convention, requiring include_path lookup
+ *     $classLoader->add('PEAR');
+ *
+ *     // Allow to PHP use the include_path for file path lookup
+ *     $classLoader->setIncludePathLookup(true);
+ *
+ *     // Possibility to change the default php file extension
+ *     $classLoader->setFileExtension('.php');
+ *
+ *     // Register the autoloader, prepending it in the stack
+ *     $classLoader->register(true);
+ *
+ * @author Guilherme Blanco <guilhermeblanco@php.net>
  * @author Jonathan H. Wage <jonwage@gmail.com>
  * @author Roman S. Borschel <roman@code-factory.org>
  * @author Matthew Weier O'Phinney <matthew@zend.com>
  * @author Kris Wallsmith <kris.wallsmith@gmail.com>
  * @author Fabien Potencier <fabien.potencier@symfony-project.org>
  */
-class SplClassLoader
+class SplClassLoader implements SplAutoloader
 {
-    private $_fileExtension = '.php';
-    private $_namespace;
-    private $_includePath;
-    private $_namespaceSeparator = '\\';
-
     /**
-     * Creates a new <tt>SplClassLoader</tt> that loads classes of the
-     * specified namespace.
-     * 
-     * @param string $ns The namespace to use.
+     * @var string
      */
-    public function __construct($ns = null, $includePath = null)
-    {
-        $this->_namespace = $ns;
-        $this->_includePath = $includePath;
-    }
-
+    private $fileExtension = '.php';
+ 
     /**
-     * Sets the namespace separator used by classes in the namespace of this class loader.
-     * 
-     * @param string $sep The separator to use.
+     * @var boolean
      */
-    public function setNamespaceSeparator($sep)
-    {
-        $this->_namespaceSeparator = $sep;
-    }
-
+    private $includePathLookup = false;
+ 
     /**
-     * Gets the namespace seperator used by classes in the namespace of this class loader.
+     * @var array
+     */
+    private $resources = array();
+ 
+    /**
+     * @var integer
+     */
+    private $mode = self::MODE_NORMAL;
+ 
+    /**
+     * {@inheritdoc}
+     */
+    public function setMode($mode)
+    {
+    	if ($mode & self::MODE_SILENT && $mode & self::MODE_NORMAL) {
+    	    throw new \InvalidArgumentException(
+    	        sprintf('Cannot have %s working normally and silently at the same time!', __CLASS__)
+    	    );
+    	}
+ 
+        $this->mode = $mode;
+    }
+ 
+    /**
+     * Define the file extension of resource files in the path of this class loader.
      *
-     * @return void
-     */
-    public function getNamespaceSeparator()
-    {
-        return $this->_namespaceSeparator;
-    }
-
-    /**
-     * Sets the base include path for all class files in the namespace of this class loader.
-     * 
-     * @param string $includePath
-     */
-    public function setIncludePath($includePath)
-    {
-        $this->_includePath = $includePath;
-    }
-
-    /**
-     * Gets the base include path for all class files in the namespace of this class loader.
-     *
-     * @return string $includePath
-     */
-    public function getIncludePath()
-    {
-        return $this->_includePath;
-    }
-
-    /**
-     * Sets the file extension of class files in the namespace of this class loader.
-     * 
      * @param string $fileExtension
      */
     public function setFileExtension($fileExtension)
     {
-        $this->_fileExtension = $fileExtension;
+        $this->fileExtension = $fileExtension;
     }
-
+ 
     /**
-     * Gets the file extension of class files in the namespace of this class loader.
+     * Retrieve the file extension of resource files in the path of this class loader.
      *
-     * @return string $fileExtension
+     * @return string
      */
     public function getFileExtension()
     {
-        return $this->_fileExtension;
+        return $this->fileExtension;
     }
-
+ 
     /**
-     * Installs this class loader on the SPL autoload stack.
+     * Turns on searching the include for class files. Allows easy loading installed PEAR packages.
+     *
+     * @param boolean $includePathLookup
      */
-    public function register()
+    public function setIncludePathLookup($includePathLookup)
     {
-        spl_autoload_register(array($this, 'loadClass'));
+        $this->includePathLookup = $includePathLookup;
     }
-
+ 
     /**
-     * Uninstalls this class loader from the SPL autoloader stack.
+     * Gets the base include path for all class files in the namespace of this class loader.
+     *
+     * @return boolean
+     */
+    public function getIncludePathLookup()
+    {
+        return $this->includePathLookup;
+    }
+ 
+    /**
+     * {@inheritdoc}
+     */
+    public function register($prepend = false)
+    {
+        spl_autoload_register(array($this, 'load'), true, $prepend);
+    }
+ 
+    /**
+     * {@inheritdoc}
      */
     public function unregister()
     {
-        spl_autoload_unregister(array($this, 'loadClass'));
+        spl_autoload_unregister(array($this, 'load'));
     }
-
+ 
     /**
-     * Loads the given class or interface.
-     *
-     * @param string $className The name of the class to load.
-     * @return void
+     * {@inheritdoc}
      */
-    public function loadClass($className)
+    public function add($resource, $resourcePath = null)
     {
-        if (null === $this->_namespace || $this->_namespace.$this->_namespaceSeparator === substr($className, 0, strlen($this->_namespace.$this->_namespaceSeparator))) {
-            $fileName = '';
-            $namespace = '';
-            if (false !== ($lastNsPos = strripos($className, $this->_namespaceSeparator))) {
-                $namespace = substr($className, 0, $lastNsPos);
-                $className = substr($className, $lastNsPos + 1);
-                $fileName = str_replace($this->_namespaceSeparator, DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
-            }
-            $fileName .= str_replace('_', DIRECTORY_SEPARATOR, $className) . $this->_fileExtension;
-            $fileName = strtolower($fileName);
-            $includePath = ($this->_includePath !== null ? $this->_includePath . DIRECTORY_SEPARATOR : '');
-
-            $namespaceName = strtolower($namespace);
-            $baseName = strtolower($className); 
-            $testPath = $includePath.$namespaceName.DIRECTORY_SEPARATOR.$baseName;
-            if (is_dir($testPath));
-            {
-		if (file_exists($testPath . DIRECTORY_SEPARATOR . $baseName .'.php'))
-                {
-                    $includePath = $testPath . DIRECTORY_SEPARATOR;
-                    $fileName = $baseName . '.php';
+        $this->resources[$resource] = (array) $resourcePath;
+    }
+ 
+    /**
+     * {@inheritdoc}
+     */
+    public function load($resourceName)
+    {
+        $resourceAbsolutePath = $this->getResourceAbsolutePath($resourceName);
+ 
+        switch (true) {
+            case ($this->mode & self::MODE_SILENT):
+                if ($resourceAbsolutePath !== false) {
+                    require $resourceAbsolutePath;
                 }
-            }
-            require $includePath . $fileName;
+                break;
+ 
+            case ($this->mode & self::MODE_NORMAL):
+            default:
+                require $resourceAbsolutePath;
+                break;
+        }
+ 
+        if ($this->mode & self::MODE_DEBUG && ! $this->isResourceDeclared($resourceName)) {
+            throw new \RuntimeException(
+                sprintf('Autoloader expected resource "%s" to be declared in file "%s".', $resourceName, $resourceAbsolutePath)
+            );
         }
     }
+ 
+    /**
+     * Transform resource name into its absolute resource path representation.
+     *
+     * @params string $resourceName
+     *
+     * @return string Resource absolute path.
+     */
+    private function getResourceAbsolutePath($resourceName)
+    {
+        $resourceRelativePath = $this->getResourceRelativePath($resourceName);
+ 
+        foreach ($this->resources as $resource => $resourcesPath) {
+            if (strpos($resourceName, $resource) !== 0) {
+                continue;
+            }
+ 
+            foreach ($resourcesPath as $resourcePath) {
+                $resourceAbsolutePath = $resourcePath . DIRECTORY_SEPARATOR . $resourceRelativePath;
+ 
+                if (is_file($resourceAbsolutePath)) {
+                    return $resourceAbsolutePath;
+                }
+            }
+        }
+ 
+        if ($this->includePathLookup && ($resourceAbsolutePath = stream_resolve_include_path($resourceRelativePath)) !== false) {
+            return $resourceAbsolutePath;
+        }
+ 
+        return false;
+    }
+ 
+    /**
+     * Transform resource name into its relative resource path representation.
+     *
+     * @params string $resourceName
+     *
+     * @return string Resource relative path.
+     */
+    private function getResourceRelativePath($resourceName)
+    {
+        // We always work with FQCN in this context
+        $resourceName = ltrim($resourceName, '\\');
+        $resourcePath = '';
+ 
+        if (($lastNamespacePosition = strrpos($resourceName, '\\')) !== false) {
+            // Namespaced resource name
+            $resourceNamespace = substr($resourceName, 0, $lastNamespacePosition);
+            $resourceName      = substr($resourceName, $lastNamespacePosition + 1);
+            $resourcePath      =  str_replace('\\', DIRECTORY_SEPARATOR, $resourceNamespace) . DIRECTORY_SEPARATOR;
+        }
+ 
+        return $resourcePath . str_replace('_', DIRECTORY_SEPARATOR . $resourceName) . $this->fileExtension;
+    }
+ 
+    /**
+     * Check if resource is declared in user space.
+     *
+     * @params string $resourceName
+     *
+     * @return boolean
+     */
+    private function isResourceDeclared($resourceName)
+    {
+    	return class_exists($resourceName, false)
+    	    || interface_exists($resourceName, false)
+    	    || (function_exists('trait_exists') && trait_exists($resourceName, false));
+    }
 }
+
