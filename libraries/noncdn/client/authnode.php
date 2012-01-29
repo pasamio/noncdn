@@ -44,7 +44,7 @@ class Client_AuthNode
 		
 		$data = http_build_query(array('username'=>$username, 'token'=>$token));
 		
-		$response = file_get_contents($server.'user/validate_credentials?'.$data);
+		$response = file_get_contents($server.'/user/validate_credentials?'.$data);
 		
 		$result = json_decode($response);
 		
