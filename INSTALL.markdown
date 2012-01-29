@@ -20,6 +20,9 @@ Each node should be deployed by exposing via a web server each of the respective
 
 Each node should be configured by the configuration file found in the directory.
 
+The first step is to check out the Git repository:
+	git clone git://github.com/pasamio/noncdn.git /var/lib/noncdn
+
 If the noncdn repository is checked out to /var/lib/noncdn, then the following Apache configuration would work within a VirtualHost directive:
 
 
@@ -27,9 +30,18 @@ If the noncdn repository is checked out to /var/lib/noncdn, then the following A
 	ServerAdmin example@noncdn.org
 	DocumentRoot "/var/lib/noncdn/master"
 	DirectoryIndex index.php
-
+	CustomLog "/var/lib/noncdn/logs/master_access_log" combined
+	ErrorLog "/var/lib/noncdn/logs/master_error_log"
 
 This sets up the document root in the given sub-directory matching the server name. In this situation it is the master node however you could swap in auth and edge respectively.
+
+For the document root, you will need a directory directive like this:
+
+	Options -Indexes
+	AllowOverride All
+
+This will disable indexes and add the ability for the .htaccess file to operate properly.
+
 
 From here you need to copy the htaccess.txt file to .htaccess and configure accordingly. You can also migrate these settings into your main Apache configuration file as well.
 
