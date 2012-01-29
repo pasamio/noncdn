@@ -9,7 +9,7 @@
 define('_JEXEC', 1);
 define('NONCDN', 1);
 
-require_once '../cli.php';
+require_once dirname(__DIR__) . '/cli.php';
 
 jimport('joomla.application.cli');
 
