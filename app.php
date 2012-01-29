@@ -6,6 +6,7 @@ defined('NONCDN') or die();
 // Load the Joomla! Platform
 define('JPATH_PLATFORM', __DIR__.'/libraries/joomla-platform/libraries');
 define('JPATH_ROOT', __DIR__);
+define('JPATH_BASE', __DIR__);
 define('DS', DIRECTORY_SEPARATOR);
 
 // Load and setup the Joomla! class loader plus backports and eBay content branch
