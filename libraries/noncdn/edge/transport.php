@@ -134,7 +134,8 @@ class Edge_Transport
 		ignore_user_abort(true);
 		set_time_limit(0);
 		
-		$params = array('outFile'=>$this->buildPathFromContentId($contentId));
+		$params = array('outFile'=>$this->buildTempPath($contentId));
+		$destination = $this->buildPathFromContentId($contentId);
 		
 		// Register the stream filter
 		stream_filter_register('noncdn.duplicate', 'NonCDN\Stream_Filter_Duplicate');
@@ -156,7 +157,9 @@ class Edge_Transport
 		}
 		
 		fpassthru($fh);
-		
+	
+		// move the temp file to the final location
+		rename($params['outFile'], $destination);	
 		// last step is to assign this file content ID to the file we just streamed
 		$this->db->assignFileContentId($contentId, $container, $path);
 	}
@@ -173,6 +176,20 @@ class Edge_Transport
 	public function buildPathFromContentId($contentId)
 	{
 		return $this->cacheDir . '/' . $contentId;
+	}
+
+	/**
+	 * Build a temporary path to store this file while it's downloading.
+	 *
+	 * @param   integer  $contentId  The content ID of the file we're going to download.
+	 *
+	 * @return  string  The path to the temp file.
+	 *
+	 * @since   1.0
+	 */
+	public function buildTempPath($contentId)
+	{
+		return tempnam($this->cacheDir, $contentId . '_');
 	}
 	
 	/**
