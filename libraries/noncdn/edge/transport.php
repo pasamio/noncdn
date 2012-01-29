@@ -129,6 +129,10 @@ class Edge_Transport
 		{
 			RequestSupport::terminate(500, 'File access error');
 		}
+
+		// disable aborting the script and the time limit
+		ignore_user_abort(true);
+		set_time_limit(0);
 		
 		$params = array('outFile'=>$this->buildPathFromContentId($contentId));
 		
