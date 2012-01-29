@@ -14,7 +14,8 @@ require __DIR__ . '/libraries/import.php';
 
 // Load the PSR-0 Class Loader and setup NonCDN namespace
 require __DIR__.'/libraries/psrloader.php';
-$loader = new \SplClassLoader('PEAR', __DIR__.'/libraries');
+$loader = new \SplClassLoader;
+$loader->add('PEAR', __DIR__.'/libraries');
 $loader->register();
 
 // Load the NonCDN class loader, a derivative of PSR-0
