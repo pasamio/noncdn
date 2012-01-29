@@ -22,6 +22,10 @@ Each node should be configured by the configuration file found in the directory.
 
 The first step is to check out the Git repository:
 	git clone git://github.com/pasamio/noncdn.git /var/lib/noncdn
+	git submodule update --init
+
+NonCDN uses submodules from the Joomla Project and the eBay Software Foundation.
+
 
 If the noncdn repository is checked out to /var/lib/noncdn, then the following Apache configuration would work within a VirtualHost directive:
 
