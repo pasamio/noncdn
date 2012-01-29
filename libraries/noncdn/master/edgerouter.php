@@ -68,13 +68,35 @@ class Master_EdgeRouter
 		}
 		else
 		{
+			$ipv4checker = new \Net_IPv4;
 			// look for CIDR formatted blocks
 			foreach ($edgeMap as $address => $targetEdges)
 			{
-				// TODO: match remote_addr using CIDR
-				//$edges = $targetEdges;
+				try
+				{
+					if ($ipv4checker->ipInNetwork($addr, $address))
+					{
+						$edges = $targetEdges;
+					}
+				}
+				catch(\Exception $e)
+				{
+					// ignore exceptions
+				}
+				try
+				{
+					if (\Net_IPv6::isInNetmask($addr, $address))
+					{
+						$edges = $targetEdges;
+					}
+				}
+				catch(\Exception $e)
+				{
+					// ignore exceptions
+				}
 			}
 		}
+		
 
 		// if we're doing a redirect, lets handle that
 		if (count($edges))
@@ -114,6 +136,6 @@ class Master_EdgeRouter
 
 		$token = $this->factory->buildTokenService()->generateToken($username, $edgeId);
 
-		return $edgeServers[$edgeId] . "auth/$username/$token/$container/$path";
+		return $edgeServers[$edgeId] . "/auth/$username/$token/$container/$path";
 	}
 }
