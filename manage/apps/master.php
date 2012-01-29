@@ -267,6 +267,54 @@ class MasterController extends Controller
 	}
 
 	/**
+	 * Add files in a given directory to a container 
+	 *
+	 * @return  void
+	 *
+	 * @since   1.0
+	 */
+	public function add_files()
+	{
+		// validate the arg count
+		if (count($this->input->args) < 5)
+		{
+			$this->out("Usage: {$this->executable} master add_files <container name> [source] [destination]");
+			exit(1);
+		}
+
+		// grab some values
+		$container_name = strtolower($this->input->args[2]);
+		$source = $this->input->args[3];
+		$destination = $this->input->args[4];
+
+		// validate our input file exists
+		if (!file_exists($source) || !is_dir($source))
+		{
+			$this->out("Source directory invalid or missing!");
+			exit(1);
+		}
+
+		$container = $this->factory->buildContainer();
+		$container->loadContainerByName($container_name);
+		// validate our container exists
+		if (!$container->container_id)
+		{
+			$this->out("Invalid container specified.");
+			exit(1);
+		}
+
+		$files = \JFolder::files(rtrim($source, '/'), '.', true, true);
+
+		foreach ($files as $file)
+		{
+			$destination = '/' . trim($destination, '/') . '/';
+			$relativePath = str_replace($source, '', $file);
+			$this->out('Adding ' . $relativePath . ' to ' . $destination . $relativePath);
+			$container->addFileFromPath($file, $destination . $relativePath);
+		}
+	}
+
+	/**
 	 * Remove file from container
 	 *
 	 * @return  void
