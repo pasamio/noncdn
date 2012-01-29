@@ -111,10 +111,18 @@ class Master_EdgeRouter
 
 		// so no redirect which means we just deliver locally
 		$container = $this->factory->buildContainer()->loadContainerByName($container);
-		$file = $container->getFileByPath($path);
-		$filePath = $file->getFilePath($this->configuration->getDataStore());
-		header('Content-type: ' . mime_content_type($filePath));
-		readfile($filePath);
+		
+		try {
+			$file = $this->getFileByPath($container, $path);
+			$filePath = $file->getFilePath($this->configuration->getDataStore());
+			header('Content-type: ' . mime_content_type($filePath));
+			header('Content-length: ' . filesize($filePath));
+			readfile($filePath);
+		}
+		catch(Exception $e)
+		{
+			throw $e;
+		}
 	}
 
 	/**
@@ -137,5 +145,24 @@ class Master_EdgeRouter
 		$token = $this->factory->buildTokenService()->generateToken($username, $edgeId);
 
 		return $edgeServers[$edgeId] . "/auth/$username/$token/$container/$path";
+	}
+	
+	protected function getFileByPath($container, $path)
+	{
+		$lastException = new Exception('Unable to map file');
+		$testpaths = array($path, $path.'/index.html', $path.'/index.htm');
+		
+		foreach($testpaths as $testpath)
+		{
+			try {
+				$file = $container->getFileByPath($testpath);
+				return $file;
+			}
+			catch(Exception $e)
+			{
+				$lastException = $e;
+			}
+		}
+		throw $lastException;
 	}
 }
