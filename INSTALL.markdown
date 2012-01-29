@@ -21,6 +21,7 @@ Each node should be deployed by exposing via a web server each of the respective
 Each node should be configured by the configuration file found in the directory.
 
 The first step is to check out the Git repository:
+
 	git clone git://github.com/pasamio/noncdn.git /var/lib/noncdn
 	git submodule update --init
 
