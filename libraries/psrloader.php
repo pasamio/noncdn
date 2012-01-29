@@ -212,7 +212,7 @@ class SplClassLoader implements SplAutoloader
     {
         $resourceAbsolutePath = $this->getResourceAbsolutePath($resourceName);
  
-	if (empty($resourceAbsolutePath) || is_file($resourceAbsolutePath))
+	if (empty($resourceAbsolutePath) || !is_file($resourceAbsolutePath))
 	{
 		return;
 	}
@@ -249,12 +249,18 @@ class SplClassLoader implements SplAutoloader
         $resourceRelativePath = $this->getResourceRelativePath($resourceName);
  
         foreach ($this->resources as $resource => $resourcesPath) {
+            $prefix = false;
             if (strpos($resourceName, $resource) !== 0) {
-                continue;
+                $prefix = true;
             }
  
             foreach ($resourcesPath as $resourcePath) {
-                $resourceAbsolutePath = $resourcePath . DIRECTORY_SEPARATOR . $resourceRelativePath;
+                $resourceAbsolutePath = $resourcePath;
+                if ($prefix)
+                {
+                    $resourceAbsolutePath .= DIRECTORY_SEPARATOR . $resource;
+                }
+                $resourceAbsolutePath .= DIRECTORY_SEPARATOR . $resourceRelativePath;
  
                 if (is_file($resourceAbsolutePath)) {
                     return $resourceAbsolutePath;
