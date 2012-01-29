@@ -467,7 +467,7 @@ class JDatabasePDO extends JDatabase
 	 */
 	function insertObject( $table, &$object, $keyName = NULL )
 	{
-		$fmtsql = 'INSERT INTO '.$this->nameQuote($table).' ( %s ) VALUES ( %s ) ';
+		$fmtsql = 'INSERT INTO '.$this->quoteName($table).' ( %s ) VALUES ( %s ) ';
 		$fields = array();
 		foreach (get_object_vars( $object ) as $k => $v) {
 			if (is_array($v) or is_object($v) or $v === NULL) {
@@ -476,8 +476,8 @@ class JDatabasePDO extends JDatabase
 			if ($k[0] == '_') { // internal field
 				continue;
 			}
-			$fields[] = $this->nameQuote( $k );
-			$values[] = $this->isQuoted( $k ) ? $this->Quote( $v ) : (int) $v;
+			$fields[] = $this->quoteName( $k );
+			$values[] = $this->quote( $v );
 		}
 
 		if (count($fields))
@@ -488,7 +488,7 @@ class JDatabasePDO extends JDatabase
 		{
 			// we can't insert an empty value using a query that'd work with mysql
 			// but we can do this and it will work
-			$this->setQuery('INSERT INTO ' . $this->nameQuote($table) . ' DEFAULT VALUES');
+			$this->setQuery('INSERT INTO ' . $this->quoteName($table) . ' DEFAULT VALUES');
 		}
 
 		if (!$this->query()) {
@@ -510,7 +510,7 @@ class JDatabasePDO extends JDatabase
 	 */
 	function updateObject( $table, &$object, $keyName, $updateNulls=true )
 	{
-		$fmtsql = 'UPDATE '.$this->nameQuote($table).' SET %s WHERE %s';
+		$fmtsql = 'UPDATE '.$this->quoteName($table).' SET %s WHERE %s';
 		$tmp = array();
 		foreach (get_object_vars( $object ) as $k => $v)
 		{
@@ -531,7 +531,7 @@ class JDatabasePDO extends JDatabase
 			} else {
 				$val = $this->isQuoted( $k ) ? $this->Quote( $v ) : (int) $v;
 			}
-			$tmp[] = $this->nameQuote( $k ) . '=' . $val;
+			$tmp[] = $this->quoteName( $k ) . '=' . $val;
 		}
 		$this->setQuery( sprintf( $fmtsql, implode( ",", $tmp ) , $where ) );
 		return $this->query();
