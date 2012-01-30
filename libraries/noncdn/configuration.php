@@ -75,6 +75,12 @@ class Configuration
 	 */
 	public function getTransport()
 	{
+		if (!isset($this->configuration->transport))
+		{
+			// default transport
+			return '\NonCDN\Transport_ReadFile';
+		}
+		// configured transport!
 		return $this->configuration->transport;
 	}
 }
