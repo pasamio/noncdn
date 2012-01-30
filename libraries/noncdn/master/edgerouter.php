@@ -81,7 +81,7 @@ class Master_EdgeRouter
 				}
 				catch(\Exception $e)
 				{
-					// ignore exceptions
+					// ignore exceptions (e.g. invalid IP address format)
 				}
 				try
 				{
@@ -92,11 +92,10 @@ class Master_EdgeRouter
 				}
 				catch(\Exception $e)
 				{
-					// ignore exceptions
+					// ignore exceptions (e.g. invalid IP address format)
 				}
 			}
 		}
-		
 
 		// if we're doing a redirect, lets handle that
 		if (count($edges))
@@ -108,16 +107,16 @@ class Master_EdgeRouter
 			exit;
 		}
 
-
 		// so no redirect which means we just deliver locally
 		$container = $this->factory->buildContainer()->loadContainerByName($container);
-		
+
 		try {
 			$file = $this->getFileByPath($container, $path);
 			$filePath = $file->getFilePath($this->configuration->getDataStore());
-			header('Content-type: ' . mime_content_type($filePath));
-			header('Content-length: ' . filesize($filePath));
-			readfile($filePath);
+
+			// deliver the file
+			$transport = $this->factory->buildTransport();
+			$transport->deliverFile($filePath);
 		}
 		catch(Exception $e)
 		{

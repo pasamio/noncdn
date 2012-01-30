@@ -193,7 +193,7 @@ class Edge_Transport
 	}
 	
 	/**
-	 * Deliver a file from a local path
+	 * Deliver a file from a local path.
 	 *
 	 * @return  void
 	 *
@@ -202,8 +202,7 @@ class Edge_Transport
 	public function deliverFileFromPath($filePath)
 	{
 		//header('Content-Disposition: attachment;filename=' . basename($filePath));
-		// TODO: used the cached mime type from the master node
-		header('Content-type: ' . mime_content_type($filePath));
-		readfile($filePath);
+		$transport = $this->factory->buildTransport();
+		$transport->deliverFile($filePath);
 	}
 }

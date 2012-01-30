@@ -6,6 +6,7 @@
  * @license     GNU General Public License version 2 or later; see LICENSE
  */
 
+namespace NonCDN;
 defined('NONCDN') or die();
 
 /**
@@ -28,6 +29,8 @@ class Transport_ReadFile implements Transport
 	 */
 	public function deliverFile($path)
 	{
+		header('Content-type: ' . mime_content_type($path));
+		header('Content-length: ' . filesize($path));	
 		readfile($path);
 	}
 }
