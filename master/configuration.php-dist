@@ -11,10 +11,13 @@ class NonCDNConfiguration
 	public $authenticator = '\NonCDN\Authenticator_Basic';
 	public $data_store = '/Users/pasamio/Sites/usq/noncdn/datastore/';
 	public $masterdb = 'sqlite:/Users/pasamio/Sites/usq/noncdn/db/master.db';
+
+
+//	public $transport = '\NonCDN\Transport_XSendFile';
 	
 	public $edge_map = array(
-		//'::1' => array(0),
-		//'127.0.0.1/8' => array(0)
+//		'::1/128' => array(0),
+//		'127.0.0.1/8' => array(0)
 	);
 }
 
