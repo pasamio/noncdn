@@ -237,7 +237,7 @@ class MasterController extends Controller
 		// validate the arg count
 		if (count($this->input->args) < 5)
 		{
-			$this->out("Usage: {$this->executable} master add_file <container name> [source] [destination]");
+			$this->out("Usage: {$this->executable} master add_file <container name> <source> <destination>");
 			exit(1);
 		}
 
@@ -278,7 +278,7 @@ class MasterController extends Controller
 		// validate the arg count
 		if (count($this->input->args) < 5)
 		{
-			$this->out("Usage: {$this->executable} master add_files <container name> [source] [destination]");
+			$this->out("Usage: {$this->executable} master add_files <container name> <source> <destination>");
 			exit(1);
 		}
 
