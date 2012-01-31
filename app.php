@@ -12,7 +12,7 @@ define('DS', DIRECTORY_SEPARATOR);
 // Load and setup the Joomla! class loader plus backports and eBay content branch
 require __DIR__.'/libraries/import.php';
 
-// Load the PSR-0 Class Loader and setup NonCDN namespace
+// Load the PSR-0 Class Loader and setup PEAR namespace
 require __DIR__.'/libraries/psrloader.php';
 $loader = new \SplClassLoader;
 $loader->add('PEAR', __DIR__.'/libraries');
@@ -31,9 +31,7 @@ if(!count($route))
 }
 
 // Borrow some Joomla!
-//jimport('platform');
 jimport('joomla.base.object');
-//jimport('joomla.filter.input');
 $inputfilter = new \JFilterInput();
 $controller = $inputfilter->clean(array_shift($route), 'CMD');
 
