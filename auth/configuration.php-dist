@@ -3,7 +3,9 @@
 class NonCDNConfiguration
 {
 	public $appname = '\NonCDN\Auth';
-	public $roleprovider = '\NonCDN\RoleProvider_Local';
+	public $roleprovider = '\NonCDN\RoleProvider_Default';
+	public $credentialstore = '\NonCDN\CredentialStore_Default';
+	public $accessprovider = '\NonCDN\Container_Access_Default';
 	public $authdb = 'sqlite:/Users/pasamio/Sites/usq/noncdn/db/auth.db';
 }
 
