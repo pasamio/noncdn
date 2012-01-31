@@ -29,7 +29,8 @@ class Transport_XSendFile implements Transport
 	 */
 	public function deliverFile($path)
 	{
-		header('Content-type: ' . mime_content_type($path));	
+		header('Content-type: ' . mime_content_type($path));
+		header('Content-length: ' . filesize($path));	
 		header('X-Sendfile: '. $path);
 	}
 }
