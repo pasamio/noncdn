@@ -32,10 +32,7 @@ class Auth_Configuration extends Configuration
 		{
 			return $this->configuration->roleprovider;
 		}
-		else
-		{
-			return 'NonCDN\RoleProvider_Default';
-		}
+		return '\NonCDN\RoleProvider_Default';
 	}
 
 	/**
@@ -47,7 +44,12 @@ class Auth_Configuration extends Configuration
 	 */
 	public function getContainerAccessProvider()
 	{
-		return 'NonCDN\Container_Access_Default';
+		if (isset($this->configuration->accessprovider)
+			&& !empty($this->configuration->accessprovider))
+		{
+			return $this->configuration->accessprovider;
+		}
+		return '\NonCDN\Container_Access_Default';
 	}
 
 	/**
@@ -59,7 +61,12 @@ class Auth_Configuration extends Configuration
 	 */
 	public function getCredentialStore()
 	{
-		return 'NonCDN\CredentialStore_Default';
+		if (isset($this->configuration->credentialstore)
+			&& !empty($this->configuration->credentialstore))
+		{
+			return $this->configuration->credentialstore;
+		}
+		return '\NonCDN\CredentialStore_Default';
 	}
 
 	/**
